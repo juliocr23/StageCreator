@@ -8,16 +8,27 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-
-    private static Stage stage;
+    public static Stage stage;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
+
+
         stage = primaryStage;
-        Parent root = FXMLLoader.load(getClass().getResource("View.fxml"));
-        primaryStage.setTitle("Hello World");
-        primaryStage.setScene(new Scene(root, 300, 275));
+
+        setUserAgentStylesheet(STYLESHEET_CASPIAN);
+
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        Parent root = fxmlLoader.load(getClass().getResource("View.fxml").openStream());
+
+        Scene scene = new Scene(root);
+        primaryStage.setTitle("Game Engine");
+        primaryStage.setScene(scene);
+        primaryStage.setMaximized(true);
         primaryStage.show();
+
+        Controller controller =  fxmlLoader.getController();
+        controller.createComponents();
     }
 
     public static void main(String[] args) {
