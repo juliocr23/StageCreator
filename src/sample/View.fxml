@@ -146,7 +146,14 @@
                                           <TextField promptText="Cells size" text="64" />
                                        </children>
                                     </HBox>
-                                    <ComboBox fx:id="addRowCol" prefHeight="27.0" prefWidth="165.0" promptText="Add Row\Column" />
+                                    <MenuButton fx:id="addRowCol" mnemonicParsing="false" prefHeight="27.0" prefWidth="166.0" text="Add Row\Column">
+                                      <items>
+                                        <MenuItem mnemonicParsing="false" onAction="#selectedRowColOperation" text="Add Row Above" />
+                                        <MenuItem mnemonicParsing="false" onAction="#selectedRowColOperation" text="Add Row Below" />
+                                          <MenuItem mnemonicParsing="false" onAction="#selectedRowColOperation" text="Add Column Before" />
+                                          <MenuItem mnemonicParsing="false" onAction="#selectedRowColOperation" text="Add Column After" />
+                                      </items>
+                                    </MenuButton>
                                  </children>
                                  <padding>
                                     <Insets left="5.0" right="5.0" top="20.0" />

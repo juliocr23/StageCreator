@@ -6,6 +6,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+
 public class Main extends Application {
 
     public static Stage stage;
@@ -31,7 +33,36 @@ public class Main extends Application {
         controller.createComponents();
     }
 
+    public static void test(){
+        ArrayList<ArrayList<Integer>> matrix = new ArrayList<>();
+
+        ArrayList<Integer> temp = new ArrayList<Integer>();
+
+        temp.add(1);
+        temp.add(2);
+        temp.add(3);
+        matrix.add(temp);
+
+
+        ArrayList<Integer> temp2 = new ArrayList<>();
+        temp2.add(4);
+        temp2.add(5);
+        temp2.add(6);
+        matrix.add(temp2);
+
+        for(int i = 0; i<matrix.size(); i++) {
+            for(int j = 0; j<matrix.get(i).size(); j++) {
+                System.out.print(matrix.get(i).get(j) + " ");
+            }
+            System.out.println();
+        }
+
+
+    }
+
     public static void main(String[] args) {
         launch(args);
     }
+
+
 }

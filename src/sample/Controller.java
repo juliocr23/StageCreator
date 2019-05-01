@@ -6,11 +6,14 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 
 public class Controller {
@@ -19,7 +22,7 @@ public class Controller {
     private ChoiceBox<String> spriteTypes;
 
     @FXML
-    private ComboBox<String> addRowCol;
+    private MenuButton addRowCol;
 
     private GridPane map;
 
@@ -39,24 +42,15 @@ public class Controller {
 
         //Add types of sprites
         ObservableList spriteList = FXCollections.observableArrayList();
-        spriteList.addAll("Tile", "Power up",
-                                     "Coin","Enemy",
-                                     "Player");
+        spriteList.addAll("Tile","background",
+                                     "Power up", "Coin",
+                                      "Enemy", "Player");
 
         spriteTypes.setItems(spriteList);
         spriteTypes.setValue("Tile");
 
-        //Different type of adding rows and cols
-        ObservableList rowColList = FXCollections.observableArrayList();
-        rowColList.addAll("Add Row Above", "Add Row Below",
-                                     "Add Column Before","Add Column After");
-        addRowCol.setItems(rowColList);
-
         int height = (int)sceneBg.getHeight();
         int width  = (int)sceneBg.getWidth();
-
-        System.out.println("h: " + height);
-        System.out.println("w: " + width);
 
         int rows = height/64;
         int cols = width/64;
@@ -66,8 +60,11 @@ public class Controller {
 
         createRows(rows,cols);
         createCols(rows,cols);
+        scroll.setContent(map);
     }
 
+    //MARK: Injected methods
+    //--------------------------------------------------------------------------------------------------------------//
     @FXML
     private void loadImage(){
         FileChooser fileChooser = new FileChooser();
@@ -94,16 +91,6 @@ public class Controller {
         createRows(rows,cols);
     }
 
-    private void createRows(int rows, int cols){
-        createNewMap();
-        for(int i = 0; i<rows; i++) {
-            for (int j = 0; j <cols; j++) {
-                replaceRowCol(i,j);
-            }
-        }
-        scroll.setContent(map);
-    }
-
     @FXML
     private void setCols(ActionEvent event) {
         TextField field =  (TextField) event.getSource();
@@ -122,9 +109,44 @@ public class Controller {
         createCols(rows,cols);
     }
 
+
+    @FXML
+    private void selectedRowColOperation(ActionEvent event){
+
+        MenuItem selectedItem =  (MenuItem)event.getSource();
+        System.out.println("Selected new Item: " + selectedItem.getText());
+
+       if(selectedItem.getText().equals("Add Row Above")) {
+            addRowAbove();
+       } else if(selectedItem.getText().equals("Add Row Below")){
+            addRowBelow();
+
+       } else if(selectedItem.getText().equals("Add Column Before")){
+            addColBefore();
+
+       }else if(selectedItem.getText().equals("Add Column After")){
+            addColAfter();
+       }
+    }
+
+
+
+
+    //MARK: Utilities functions
+    //--------------------------------------------------------------------------------------------------------------//
+    private void createRows(int rows, int cols){
+        map = getNewMap();
+        for(int i = 0; i<rows; i++) {
+            for (int j = 0; j <cols; j++) {
+                replaceRowCol(i,j);
+            }
+        }
+        scroll.setContent(map);
+    }
+
     private void createCols(int rows, int cols){
 
-        createNewMap();
+        map = getNewMap();
         for(int i = 0; i<rows; i++) {
             for (int j = 0; j <cols; j++) {
                 replaceRowCol(i,j);
@@ -134,22 +156,33 @@ public class Controller {
     }
 
     private void replaceRowCol(int i, int j){
-        Canvas canvas = new Canvas(64,64);
-        canvas.getGraphicsContext2D().setFill(Color.BLACK);
-        canvas.getGraphicsContext2D().fillRect(0,0,64,64);
-        GridPane.setConstraints(canvas,j,i,1,1);
-        map.getChildren().add(canvas);
+        Canvas newCanvas = getNewCanvas(Color.BLACK);
+
+        newCanvas.getGraphicsContext2D().setFill(Color.WHITE);
+        newCanvas.getGraphicsContext2D().fillText("(" + i + "," + j + ")",0,32);
+        GridPane.setConstraints(newCanvas,j,i,1,1);
+        map.getChildren().add(newCanvas);
     }
 
-    private void createNewMap(){
-        map = new GridPane();
-        map.setGridLinesVisible(true);
-        map.setHgap(5);
-        map.setVgap(5);
-        map.setAlignment(Pos.CENTER);
+    private Canvas getNewCanvas(Color color){
+        Canvas canvas = new Canvas(64,64);
+        canvas.getGraphicsContext2D().setFill(color);
+        canvas.getGraphicsContext2D().fillRect(0,0,64,64);
+
+        return canvas;
+    }
+
+    private GridPane getNewMap(){
+        GridPane newGridPane = new GridPane();
+        newGridPane.setGridLinesVisible(true);
+        newGridPane.setHgap(5);
+        newGridPane.setVgap(5);
+        newGridPane.setAlignment(Pos.CENTER);
 
         Insets value = new Insets(10,10,10,10);
-        map.paddingProperty().setValue(value);
+        newGridPane.paddingProperty().setValue(value);
+
+        return newGridPane;
     }
 
     private boolean isNumber(String str) {
@@ -163,5 +196,39 @@ public class Controller {
         }
 
         return true;
+    }
+
+    private void addRowAbove(){
+        
+        ObservableList<Node> nodes = map.getChildren();
+
+        Canvas newCanvas1 = getNewCanvas(Color.RED);
+        Canvas newCanvas2 = getNewCanvas(Color.RED);
+
+        map.getChildren().add(newCanvas1);
+        map.getChildren().add(newCanvas2);
+
+        int k = map.getChildren().size() -1;
+        for(int row = 0; k > 0; row++) {
+
+            for(int col =0; col<map.getColumnCount() && k > 0; col++) {
+
+                System.out.println(k + "," + col + "," + row + "," + 1 + "," + 1);
+                GridPane.setConstraints(nodes.get(k),col,row,1,1);
+                k--;
+            }
+        }
+    }
+
+    private void addRowBelow(){
+        for(int i = 0; i<map.getColumnCount(); i++)
+            map.addColumn(i,getNewCanvas(Color.BLACK));
+    }
+
+    private void addColBefore(){}
+
+    private void addColAfter(){
+        for(int i = 0; i<map.getRowCount(); i++)
+            map.addRow(i,getNewCanvas(Color.BLACK));
     }
 }
