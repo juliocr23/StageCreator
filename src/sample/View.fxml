@@ -181,7 +181,7 @@
               <tabs>
                 <Tab text="TODO">
                      <content>
-                        <AnchorPane prefHeight="200.0" prefWidth="200.0" />
+                        <AnchorPane fx:id="console" prefHeight="200.0" prefWidth="200.0" />
                      </content>
                   </Tab>
               </tabs>

@@ -1,25 +1,34 @@
 package sample;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.JFXPanel;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
+
 
 public class Controller {
 
     @FXML
     private ChoiceBox<String> spriteTypes;
+
+    @FXML
+    private AnchorPane console;
 
     @FXML
     private MenuButton addRowCol;
@@ -109,7 +118,6 @@ public class Controller {
         createCols(rows,cols);
     }
 
-
     @FXML
     private void selectedRowColOperation(ActionEvent event){
 
@@ -128,9 +136,6 @@ public class Controller {
             addColAfter();
        }
     }
-
-
-
 
     //MARK: Utilities functions
     //--------------------------------------------------------------------------------------------------------------//
@@ -165,10 +170,40 @@ public class Controller {
     }
 
     private Canvas getNewCanvas(Color color){
+
         Canvas canvas = new Canvas(64,64);
         canvas.getGraphicsContext2D().setFill(color);
         canvas.getGraphicsContext2D().fillRect(0,0,64,64);
 
+        canvas.setOnDragDropped(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                 Image image = event.getDragboard().getImage();
+
+                 System.out.println(image);
+
+                 Canvas canvas = (Canvas)event.getSource();
+                 canvas.getGraphicsContext2D().drawImage(image,0,0,64,64);
+
+                 event.setDropCompleted(true);
+                 event.consume();
+            }
+        });
+
+        canvas.setOnDragOver(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                event.consume();
+            }
+        });
+
+        canvas.setOnDragExited(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                event.consume();
+            }
+        });
         return canvas;
     }
 
@@ -199,36 +234,118 @@ public class Controller {
     }
 
     private void addRowAbove(){
-        
-        ObservableList<Node> nodes = map.getChildren();
 
-        Canvas newCanvas1 = getNewCanvas(Color.RED);
-        Canvas newCanvas2 = getNewCanvas(Color.RED);
+        var nodes = map.getChildren();
+        int cols = map.getColumnCount();
+        int size = nodes.size();
 
-        map.getChildren().add(newCanvas1);
-        map.getChildren().add(newCanvas2);
-
-        int k = map.getChildren().size() -1;
-        for(int row = 0; k > 0; row++) {
-
-            for(int col =0; col<map.getColumnCount() && k > 0; col++) {
-
-                System.out.println(k + "," + col + "," + row + "," + 1 + "," + 1);
-                GridPane.setConstraints(nodes.get(k),col,row,1,1);
-                k--;
-            }
+        //Add new canvas above
+        for(int i = 0; i<cols; i++) {
+            Canvas newCanvas = getNewCanvas(Color.RED);
+            GridPane.setConstraints(newCanvas, i, 0, 1, 1);
+            map.getChildren().add(newCanvas);
         }
+
+        //Shift rows constraints by 1
+        for(int i = 1; i<size; i++) {
+            int r = GridPane.getRowIndex(nodes.get(i)) + 1;
+            int c = GridPane.getColumnIndex(nodes.get(i));
+            GridPane.setConstraints(nodes.get(i),c,r,1,1);
+        }
+        fixMatrix();
+
+        int rows = Integer.valueOf(this.rows.getText()) + 1;
+        this.rows.setText(rows + "");
     }
 
     private void addRowBelow(){
-        for(int i = 0; i<map.getColumnCount(); i++)
-            map.addColumn(i,getNewCanvas(Color.BLACK));
+
+        int cols = map.getColumnCount();
+        int rows = map.getRowCount();
+
+        //Add new canvas below
+        for(int i = 0; i<cols; i++) {
+            Canvas newCanvas = getNewCanvas(Color.GREEN);
+            GridPane.setConstraints(newCanvas, i, rows, 1, 1);
+            map.getChildren().add(newCanvas);
+        }
+
+        rows = Integer.valueOf(this.rows.getText()) + 1;
+        this.rows.setText(rows + "");
     }
 
-    private void addColBefore(){}
+    private void addColBefore(){
+
+        var nodes = map.getChildren();
+        int rows = map.getRowCount();
+        int size = nodes.size();
+
+        //Add new canvas to the left
+        for(int i = 0; i<rows; i++) {
+            Canvas newCanvas = getNewCanvas(Color.YELLOW);
+            GridPane.setConstraints(newCanvas, 0, i, 1, 1);
+            map.getChildren().add(newCanvas);
+        }
+
+        //Shift columns constraints by 1
+        for(int i = 1; i<size; i++) {
+            int r = GridPane.getRowIndex(nodes.get(i));
+            int c = GridPane.getColumnIndex(nodes.get(i)) + 1;
+            GridPane.setConstraints(nodes.get(i),c,r,1,1);
+        }
+
+        fixMatrix();
+
+        rows = Integer.valueOf(this.cols.getText()) + 1;
+        this.cols.setText(rows+"");
+    }
 
     private void addColAfter(){
-        for(int i = 0; i<map.getRowCount(); i++)
-            map.addRow(i,getNewCanvas(Color.BLACK));
+
+        int cols = map.getColumnCount();
+        int rows = map.getRowCount();
+
+        for(int i = 0; i< rows; i++) {
+              Canvas newCanvas = getNewCanvas(Color.BLUE);
+              GridPane.setConstraints(newCanvas, cols, i, 1, 1);
+              map.getChildren().add(newCanvas);
+        }
+
+        fixMatrix();
+
+        rows = Integer.valueOf(this.cols.getText()) + 1;
+        this.cols.setText(rows+"");
+    }
+
+    private void fixMatrix(){
+
+       var nodes = map.getChildren();
+       var cols = map.getColumnCount();
+
+       Node matrix[] = new Node[nodes.size()];
+
+       matrix[0] = nodes.get(0);
+       for(int i = 1; i<nodes.size(); i++) {
+
+           //Get the row, col where i is.
+           int r = GridPane.getRowIndex(nodes.get(i));
+           int c = GridPane.getColumnIndex(nodes.get(i));
+
+           //Get the index where i is supposed to be.
+           int index = getIndex(r,c,cols);
+
+           if(matrix[index] == null)
+                matrix[index] = nodes.get(i);
+           else
+               System.out.println("is not null");
+       }
+
+       nodes.clear();
+       for(int i = 0; i<matrix.length; i++)
+           nodes.add(matrix[i]);
+    }
+
+    private int getIndex(int row, int col, int w) {
+        return (w*row + col + 1);
     }
 }
