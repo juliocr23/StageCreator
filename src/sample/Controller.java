@@ -1,7 +1,6 @@
 package sample;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.JFXPanel;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -14,10 +13,10 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 
@@ -171,26 +170,59 @@ public class Controller {
 
     private Canvas getNewCanvas(Color color){
 
-        Canvas canvas = new Canvas(64,64);
+        Canvas canvas = new Cell(64,64);
         canvas.getGraphicsContext2D().setFill(color);
         canvas.getGraphicsContext2D().fillRect(0,0,64,64);
 
-        canvas.setOnDragDropped(new EventHandler<DragEvent>() {
+       // canvas.getGraphicsContext2D().
+
+        //TODO: Make image view instead of canvas
+
+
+
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(64);
+        imageView.setFitHeight(64);
+        imageView.setPreserveRatio(true);
+
+       // canvas.setClip(imageView);
+       // imageView.
+
+        //imageView.set
+       // imageView.setStyle("-fx-background-color:" + color.toString());
+
+        canvas.setOnDragDetected(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+
+               Cell cell= (Cell) event.getSource();
+               Dragboard db = cell.startDragAndDrop(TransferMode.COPY_OR_MOVE);
+
+                ClipboardContent content = new ClipboardContent();
+                content.putImage(cell.getImage());
+                db.setContent(content);
+                db.setDragView(cell.getImage(64,64));
+                event.consume();
+            }
+        });
+
+      canvas.setOnDragDropped(new EventHandler<DragEvent>() {
             @Override
             public void handle(DragEvent event) {
                  Image image = event.getDragboard().getImage();
 
                  System.out.println(image);
+                 Cell cell = (Cell) event.getSource();
 
-                 Canvas canvas = (Canvas)event.getSource();
-                 canvas.getGraphicsContext2D().drawImage(image,0,0,64,64);
+                 cell.setImage(image);
+                 cell.drawCell(0,0,64,64);
 
                  event.setDropCompleted(true);
                  event.consume();
             }
         });
 
-        canvas.setOnDragOver(new EventHandler<DragEvent>() {
+      canvas.setOnDragOver(new EventHandler<DragEvent>() {
             @Override
             public void handle(DragEvent event) {
                 event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
@@ -198,12 +230,14 @@ public class Controller {
             }
         });
 
-        canvas.setOnDragExited(new EventHandler<DragEvent>() {
+       canvas.setOnDragExited(new EventHandler<DragEvent>() {
             @Override
             public void handle(DragEvent event) {
                 event.consume();
             }
         });
+
+
         return canvas;
     }
 
