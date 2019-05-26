@@ -1,8 +1,9 @@
 package sample;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.event.EventTarget;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -14,12 +15,24 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+//TODO: Add a slider for zooming in and out.
 
 public class Controller {
 
@@ -45,6 +58,8 @@ public class Controller {
 
     @FXML
     private ScrollPane scroll;
+
+    private Cell temp;  //Use for drag and drop temporary.
 
     public void createComponents(){
 
@@ -136,7 +151,7 @@ public class Controller {
        }
     }
 
-    //MARK: Utilities functions
+    //MARK: Creation of Rows and Cols
     //--------------------------------------------------------------------------------------------------------------//
     private void createRows(int rows, int cols){
         map = getNewMap();
@@ -165,80 +180,65 @@ public class Controller {
         newCanvas.getGraphicsContext2D().setFill(Color.WHITE);
         newCanvas.getGraphicsContext2D().fillText("(" + i + "," + j + ")",0,32);
         GridPane.setConstraints(newCanvas,j,i,1,1);
+
+
         map.getChildren().add(newCanvas);
+
     }
 
     private Canvas getNewCanvas(Color color){
 
-        Canvas canvas = new Cell(64,64);
-        canvas.getGraphicsContext2D().setFill(color);
-        canvas.getGraphicsContext2D().fillRect(0,0,64,64);
-
-       // canvas.getGraphicsContext2D().
-
-        //TODO: Make image view instead of canvas
-
-
-
-        ImageView imageView = new ImageView();
-        imageView.setFitWidth(64);
-        imageView.setFitHeight(64);
-        imageView.setPreserveRatio(true);
-
-       // canvas.setClip(imageView);
-       // imageView.
-
-        //imageView.set
-       // imageView.setStyle("-fx-background-color:" + color.toString());
-
-        canvas.setOnDragDetected(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-
-               Cell cell= (Cell) event.getSource();
-               Dragboard db = cell.startDragAndDrop(TransferMode.COPY_OR_MOVE);
-
-                ClipboardContent content = new ClipboardContent();
-                content.putImage(cell.getImage());
-                db.setContent(content);
-                db.setDragView(cell.getImage(64,64));
-                event.consume();
-            }
-        });
-
-      canvas.setOnDragDropped(new EventHandler<DragEvent>() {
-            @Override
-            public void handle(DragEvent event) {
-                 Image image = event.getDragboard().getImage();
-
-                 System.out.println(image);
-                 Cell cell = (Cell) event.getSource();
-
-                 cell.setImage(image);
-                 cell.drawCell(0,0,64,64);
-
-                 event.setDropCompleted(true);
-                 event.consume();
-            }
-        });
-
-      canvas.setOnDragOver(new EventHandler<DragEvent>() {
-            @Override
-            public void handle(DragEvent event) {
-                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-                event.consume();
-            }
-        });
-
-       canvas.setOnDragExited(new EventHandler<DragEvent>() {
-            @Override
-            public void handle(DragEvent event) {
-                event.consume();
-            }
-        });
-
+        Canvas canvas = new Cell(64,64, color);
+        setDragAndDrop(canvas);
 
         return canvas;
+    }
+
+    //MARK: Drag and Drop
+    //--------------------------------------------------------------------------------------------------------------//
+    private void setDragAndDrop(Canvas canvas) {
+
+        //When moving sprites inside the GUI
+        canvas.setOnDragDetected(event -> {
+
+            temp = (Cell) event.getSource();
+            ClipboardContent content = new ClipboardContent();
+            content.putFiles(Arrays.asList(temp.getFile()));
+
+            Dragboard db = temp.startDragAndDrop(TransferMode.MOVE);
+            db.setContent(content);
+
+            event.consume();
+        });
+
+        canvas.setOnDragDropped(event -> {
+
+            System.out.println(event.getPickResult().getIntersectedNode());
+            List<File> files = event.getDragboard().getFiles();
+
+            Cell cell = (Cell) event.getSource();
+            if(files.size() > 0) {
+
+                cell.setImageData(files.get(0));
+                cell.drawCell(0,0);
+
+                //If drop is from within UI
+                if(temp != null) {
+                    temp.clearCell();
+                    temp = null;
+                }
+            }
+
+            event.setDropCompleted(true);
+            event.consume();
+        });
+
+        canvas.setOnDragOver(event -> {
+            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            event.consume();
+        });
+
+        canvas.setOnDragExited(event -> event.consume());
     }
 
     private GridPane getNewMap(){
@@ -267,6 +267,8 @@ public class Controller {
         return true;
     }
 
+    //MARK: Add Rows and Cols
+    //--------------------------------------------------------------------------------------------------------------//
     private void addRowAbove(){
 
         var nodes = map.getChildren();
