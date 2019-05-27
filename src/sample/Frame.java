@@ -3,6 +3,9 @@ package sample;
 import javafx.scene.image.Image;
 
 import javafx.scene.image.ImageView;
+
+import java.awt.event.MouseEvent;
+import java.beans.EventHandler;
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -24,5 +27,21 @@ public class Frame extends ImageView {
         }catch (Exception e) {
             System.out.println(e.getMessage());
         }
+
+        setOnMousePressed(EventHandler-> {
+            //Will save initial data
+
+        });
+
+        setOnMouseMoved(EventHandler-> {
+            //Will change the cursor and enable the resize
+        });
+
+        setOnMouseDragged(EventHandler->{
+            //Will do the resize
+        });
+
     }
+
+
 }

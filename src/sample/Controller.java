@@ -11,13 +11,12 @@ import javafx.scene.control.*;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import java.io.*;
@@ -77,14 +76,39 @@ public class Controller {
         this.rows.setText(rows + "");
         this.cols.setText(cols + "");
 
+//        pane = new Pane();
+//        pane.setPrefSize(width,height);
+//        scroll.setContent(pane);
 
-        //createRows(rows,cols);
-        //createCols(rows,cols);
+//        Polyline polyline = new Polyline();
+//
+//        polyline.setStroke(Color.BLUE);
+//        polyline.getPoints().addAll(new Double[]{
+//
+//                /*
+//                * x-10,y
+//                * x,y
+//                * */
+//
+//
+//                10.0, 10.0,
+//                20.0, 10.0,
+//
+//                20.0, 10.0,
+//                20.0, 0.0
+////                450.0, 150.0,
+////                400.0, 250.0,
+////                200.0, 250.0,
+////                150.0, 150.0,
+//        });
 
-        //createCanvas(width,height);
+    //    pane.getChildren().add(polyline);
+
+
+
 
         createPane(width,height);
-         scroll.setContent(pane);
+        scroll.setContent(pane);
 
         Insets value = new Insets(10,10,10,10);
         scroll.paddingProperty().setValue(value);
@@ -334,8 +358,82 @@ public class Controller {
                 temp = null;
             }
 
+            double imgX = newView.getX();
+            double imgY = newView.getY();
+
+            double imgW = newView.getImage().getWidth();
+            double imgH = newView.getImage().getHeight();
+
+            double[] leftTopEdge = {
+                    imgX-10,imgY,   //Starting point
+                    imgX,imgY,
+
+                    imgX,imgY,      //Ending point
+                    imgX,imgY-10
+            };
+
+            double[] midTopEdge = {
+
+                    (imgX + (imgW/2)) -5,imgY,
+                    (imgX + (imgW/2)) +5,imgY,
+
+                    (imgX + (imgW/2)), imgY,
+                    (imgX + (imgW/2)), imgY-10
+            };
+
+            double[] rightTopEdge = {
+                    imgX+imgW+10,imgY,
+                    imgX+imgW,imgY,
+
+                    imgX+imgW,imgY,
+                    imgX+imgW, imgY-10
+            };
+
+            double[] leftMidEdge = {
+                    imgX,imgY+(imgH/2)-5,
+                    imgX,imgY+(imgH/2)+5,
+//
+//                    imgX-10,imgY+(imgH/2),
+//                    imgX,imgY+(imgH/2)
+            };
+
+            double[] leftBottomEdge = {
+
+            };
+
+
+            double[] midBottomEdge = {
+
+            };
+
+            double[] rightBottomEdge = {
+
+            };
+
+            double[] rightMidEdge = {};
+
+
+
+            Polyline leftTopPoly = new Polyline(leftTopEdge);
+            leftTopPoly.setStroke(Color.BLUE);
+
+            Polyline midTopPoly = new Polyline(midTopEdge);
+            midTopPoly.setStroke(Color.BLUE);
+
+            Polyline rightTopPoly = new Polyline(rightTopEdge);
+            rightTopPoly.setStroke(Color.BLUE);
+
+            Polyline leftMidPoly = new Polyline(leftMidEdge);
+            leftMidPoly.setStroke(Color.BLUE);
+
+
             setDragAndDrop(newView);
             pane.getChildren().add(newView);
+            pane.getChildren().add(leftTopPoly);
+            pane.getChildren().add(midTopPoly);
+            pane.getChildren().add(rightTopPoly);
+            pane.getChildren().add(leftMidPoly);
+
     }
 
     private GridPane getNewMap(){
