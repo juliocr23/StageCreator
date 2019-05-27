@@ -12,6 +12,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -50,7 +51,7 @@ public class Controller {
     @FXML
     private ScrollPane scroll;
 
-    private Cell temp;  //Use for drag and drop temporary.
+    private Frame temp;  //Use for drag and drop temporary.
 
     Canvas canvas;
 
@@ -76,34 +77,23 @@ public class Controller {
         this.rows.setText(rows + "");
         this.cols.setText(cols + "");
 
-        pane = new Pane();
-        pane.setPrefSize(width,height);
 
-
-        Rectangle rectangle = new Rectangle(0,0,64,64);
-        rectangle.setFill(Color.TRANSPARENT);
-        rectangle.setStroke(Color.BLACK);
-
-
-        pane.getChildren().add(rectangle);
         //createRows(rows,cols);
         //createCols(rows,cols);
 
         //createCanvas(width,height);
+
+        createPane(width,height);
          scroll.setContent(pane);
 
         Insets value = new Insets(10,10,10,10);
         scroll.paddingProperty().setValue(value);
     }
 
-    
 
-    private void createCanvas(int width, int height) {
-
-        canvas = new Canvas(width,height);
-        canvas.getGraphicsContext2D().setFill(Color.BLACK);
-        canvas.getGraphicsContext2D().fillRect(0,0,width,height);
-        canvas.getGraphicsContext2D().setStroke(Color.WHITE);
+    private void createPane(int width, int height){
+        pane = new Pane();
+        pane.setPrefSize(width,height);
 
         int w = 64;
         int h = 64;
@@ -114,15 +104,49 @@ public class Controller {
         for(int i = 0; i<height/64; i++) {
 
             for (int j = 0; j <width/64; j++) {
-               canvas.getGraphicsContext2D().strokeRect(10 + colOffset,10 + rowOffset,w,h);
-               colOffset += w;
+
+                Rectangle rectangle = new Rectangle(colOffset,rowOffset,w,h);
+                rectangle.setFill(Color.TRANSPARENT);
+                rectangle.setStroke(Color.BLACK);
+
+                pane.getChildren().add(rectangle);
+
+                colOffset += w;
             }
             rowOffset += h;
             colOffset = 0;
         }
 
-        setDragAndDrop(canvas);
+        setDragAndDrop(pane);
     }
+
+
+
+//    private void createCanvas(int width, int height) {
+//
+//        canvas = new Canvas(width,height);
+//        canvas.getGraphicsContext2D().setFill(Color.BLACK);
+//        canvas.getGraphicsContext2D().fillRect(0,0,width,height);
+//        canvas.getGraphicsContext2D().setStroke(Color.WHITE);
+//
+//        int w = 64;
+//        int h = 64;
+//
+//        int rowOffset = 0;
+//        int colOffset = 0;
+//
+//        for(int i = 0; i<height/64; i++) {
+//
+//            for (int j = 0; j <width/64; j++) {
+//               canvas.getGraphicsContext2D().strokeRect(10 + colOffset,10 + rowOffset,w,h);
+//               colOffset += w;
+//            }
+//            rowOffset += h;
+//            colOffset = 0;
+//        }
+//
+//        setDragAndDrop(canvas);
+//    }
 
 
     //MARK: Injected methods
@@ -228,83 +252,90 @@ public class Controller {
     private Canvas getNewCanvas(Color color){
 
         Canvas canvas = new Cell(64,64, color);
-        setDragAndDrop(canvas);
+      //  setDragAndDrop(canvas);
 
         return canvas;
     }
 
     //MARK: Drag and Drop
     //--------------------------------------------------------------------------------------------------------------//
-    private void setDragAndDrop(Canvas canvas) {
+
+
+
+    private void setDragAndDrop(Node node) {
 
         //When moving sprites inside the GUI
-        canvas.setOnDragDetected(event -> {
+        node.setOnDragDetected(event -> handleDragStart(event));
 
-            temp = (Cell) event.getSource();
-            ClipboardContent content = new ClipboardContent();
-            content.putFiles(Arrays.asList(temp.getFile()));
-
-            Dragboard db = temp.startDragAndDrop(TransferMode.MOVE);
-            db.setContent(content);
-
-            event.consume();
+        node.setOnDragDropped(event -> {
+            handleDrop(event);
         });
 
-        canvas.setOnDragDropped(event -> {
-
-            System.out.println(event.getPickResult().getIntersectedNode());
-            List<File> files = event.getDragboard().getFiles();
-
-            int x = (int)(event.getX()/64)* 64 + 10;
-            int y = (int)(event.getY()/64)* 64 + 10;
-
-            System.out.println(x);
-            System.out.println(y);
-
-            if(files.size() > 0) {
-                addImage(files.get(0),x,y);
-            }
-
-            event.setDropCompleted(true);
-            event.consume();
-
-
-//            Cell cell = (Cell) event.getSource();
-//            if(files.size() > 0) {
-//
-//                cell.setImageData(files.get(0));
-//                cell.drawCell(0,0);
-//
-//                //If drop is from within UI
-//                if(temp != null) {
-//                    temp.clearCell();
-//                    temp = null;
-//                }
-//            }
-//
-
-        });
-
-        canvas.setOnDragOver(event -> {
+        node.setOnDragOver(event -> {
             event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
             event.consume();
         });
 
-        canvas.setOnDragExited(event -> event.consume());
+
+        node.setOnDragExited(event ->  {
+            event.consume();
+        });
+
+        node.setOnDragDone(dragEvent -> {
+
+        if(!dragEvent.isDropCompleted())
+            if(temp != null)
+                temp.setVisible(true);
+
+            dragEvent.consume();
+        });
     }
+
+
+    private void handleDragStart(MouseEvent event) {
+
+        temp = (Frame) event.getSource();
+
+        //Set the content to be transfer
+        ClipboardContent content = new ClipboardContent();
+        content.putFiles(Arrays.asList(temp.file));
+
+        Dragboard db = temp.startDragAndDrop(TransferMode.COPY_OR_MOVE);
+        db.setContent(content);
+        db.setDragView(temp.getImage());
+
+        temp.setVisible(false);
+
+        event.consume();
+    }
+
+    private void handleDrop(DragEvent event) {
+
+        System.out.println(event.getPickResult().getIntersectedNode());
+        List<File> files = event.getDragboard().getFiles();
+
+        if(files.size() > 0) {
+            addImage(files.get(0),event.getX(),event.getY());
+        }
+
+        event.setDropCompleted(true);
+        event.consume();
+    }
+
+
 
 
     private void addImage(File file, double x, double y) {
 
-        try {
-            FileInputStream inputStream = new FileInputStream(file);
-            Image image = new Image(inputStream);
-            canvas.getGraphicsContext2D().drawImage(image,x,y);
+            Frame newView = new Frame(file,x,y);
 
-            inputStream.close();
-        }catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+            if(temp != null) {
+                pane.getChildren().remove(temp);
+                temp = null;
+            }
+
+            setDragAndDrop(newView);
+            pane.getChildren().add(newView);
     }
 
     private GridPane getNewMap(){
