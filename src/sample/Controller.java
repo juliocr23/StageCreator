@@ -2,6 +2,7 @@ package sample;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -75,37 +76,6 @@ public class Controller {
 
         this.rows.setText(rows + "");
         this.cols.setText(cols + "");
-
-//        pane = new Pane();
-//        pane.setPrefSize(width,height);
-//        scroll.setContent(pane);
-
-//        Polyline polyline = new Polyline();
-//
-//        polyline.setStroke(Color.BLUE);
-//        polyline.getPoints().addAll(new Double[]{
-//
-//                /*
-//                * x-10,y
-//                * x,y
-//                * */
-//
-//
-//                10.0, 10.0,
-//                20.0, 10.0,
-//
-//                20.0, 10.0,
-//                20.0, 0.0
-////                450.0, 150.0,
-////                400.0, 250.0,
-////                200.0, 250.0,
-////                150.0, 150.0,
-//        });
-
-    //    pane.getChildren().add(polyline);
-
-
-
 
         createPane(width,height);
         scroll.setContent(pane);
@@ -328,6 +298,7 @@ public class Controller {
         db.setContent(content);
         db.setDragView(temp.getImage());
 
+        temp.showPoly(false);
         temp.setVisible(false);
 
         event.consume();
@@ -346,40 +317,49 @@ public class Controller {
         event.consume();
     }
 
-
-
-
     private void addImage(File file, double x, double y) {
 
             Frame newView = new Frame(file,x,y);
+            newView.showPoly(false);
 
             if(temp != null) {
+
+                pane.getChildren().removeAll(temp.polylines);
+                pane.getChildren().removeAll(temp.circles);
+
                 pane.getChildren().remove(temp);
                 temp = null;
             }
 
-            double imgX = newView.getX();
-            double imgY = newView.getY();
-
-            double imgW = newView.getImage().getWidth();
-            double imgH = newView.getImage().getHeight();
-
-
             setDragAndDrop(newView);
             pane.getChildren().add(newView);
+            pane.getChildren().addAll(newView.polylines);
+            pane.getChildren().addAll(newView.circles);
+//
+//            pane.getChildren().add(newView.leftTopCircle);
+//            pane.getChildren().add(newView.leftMidCircle);
+//            pane.getChildren().add(newView.leftBottomCircle);
+//
+//            pane.getChildren().add(newView.rightTopCircle);
+//            pane.getChildren().add(newView.rightMidCircle);
+//            pane.getChildren().add(newView.rightBottomCircle);
+//
+//            pane.getChildren().add(newView.midBottomCircle);
+//            pane.getChildren().add(newView.midTopCircle);
+//
+//
+//            pane.getChildren().add(newView.leftTopPoly);
+//            pane.getChildren().add(newView.leftMidPoly);
+//            pane.getChildren().add(newView.leftBottomPoly);
+//
+//            pane.getChildren().add(newView.rightTopPoly);
+//            pane.getChildren().add(newView.rightMidPoly);
+//            pane.getChildren().add(newView.rightBottomPoly);
+//
+//            pane.getChildren().add(newView.midBottomPoly);
+//            pane.getChildren().add(newView.midTopPoly);
 
-            pane.getChildren().add(getLeftTopPoly(imgX,imgY));
-            pane.getChildren().add(getLeftMidPoly(imgX,imgY,imgH));
-            pane.getChildren().add(getLeftBottomPoly(imgX,imgY,imgH));
-
-            pane.getChildren().add(getRightTopPoly(imgX,imgY,imgW));
-            pane.getChildren().add(getRightMidPoly(imgX,imgY,imgW,imgH));
-            pane.getChildren().add(getRightBottomPoly(imgX,imgY,imgW,imgH));
-
-            pane.getChildren().add(getMidBottomPoly(imgX,imgY,imgW,imgH));
-            pane.getChildren().add(getMidTopPoly(imgX,imgY,imgW));
-
-
+           // pane.getChildren().ad
     }
 
     private Polyline getLeftTopPoly(double x, double y) {
