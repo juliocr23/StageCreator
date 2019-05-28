@@ -364,77 +364,165 @@ public class Controller {
             double imgW = newView.getImage().getWidth();
             double imgH = newView.getImage().getHeight();
 
-            double[] leftTopEdge = {
-                    imgX-10,imgY,   //Starting point
-                    imgX,imgY,
-
-                    imgX,imgY,      //Ending point
-                    imgX,imgY-10
-            };
-
-            double[] midTopEdge = {
-
-                    (imgX + (imgW/2)) -5,imgY,
-                    (imgX + (imgW/2)) +5,imgY,
-
-                    (imgX + (imgW/2)), imgY,
-                    (imgX + (imgW/2)), imgY-10
-            };
-
-            double[] rightTopEdge = {
-                    imgX+imgW+10,imgY,
-                    imgX+imgW,imgY,
-
-                    imgX+imgW,imgY,
-                    imgX+imgW, imgY-10
-            };
-
-            double[] leftMidEdge = {
-                    imgX,imgY+(imgH/2)-5,
-                    imgX,imgY+(imgH/2)+5,
-//
-//                    imgX-10,imgY+(imgH/2),
-//                    imgX,imgY+(imgH/2)
-            };
-
-            double[] leftBottomEdge = {
-
-            };
-
-
-            double[] midBottomEdge = {
-
-            };
-
-            double[] rightBottomEdge = {
-
-            };
-
-            double[] rightMidEdge = {};
-
-
-
-            Polyline leftTopPoly = new Polyline(leftTopEdge);
-            leftTopPoly.setStroke(Color.BLUE);
-
-            Polyline midTopPoly = new Polyline(midTopEdge);
-            midTopPoly.setStroke(Color.BLUE);
-
-            Polyline rightTopPoly = new Polyline(rightTopEdge);
-            rightTopPoly.setStroke(Color.BLUE);
-
-            Polyline leftMidPoly = new Polyline(leftMidEdge);
-            leftMidPoly.setStroke(Color.BLUE);
-
 
             setDragAndDrop(newView);
             pane.getChildren().add(newView);
-            pane.getChildren().add(leftTopPoly);
-            pane.getChildren().add(midTopPoly);
-            pane.getChildren().add(rightTopPoly);
-            pane.getChildren().add(leftMidPoly);
+
+            pane.getChildren().add(getLeftTopPoly(imgX,imgY));
+            pane.getChildren().add(getLeftMidPoly(imgX,imgY,imgH));
+            pane.getChildren().add(getLeftBottomPoly(imgX,imgY,imgH));
+
+            pane.getChildren().add(getRightTopPoly(imgX,imgY,imgW));
+            pane.getChildren().add(getRightMidPoly(imgX,imgY,imgW,imgH));
+            pane.getChildren().add(getRightBottomPoly(imgX,imgY,imgW,imgH));
+
+            pane.getChildren().add(getMidBottomPoly(imgX,imgY,imgW,imgH));
+            pane.getChildren().add(getMidTopPoly(imgX,imgY,imgW));
+
 
     }
+
+    private Polyline getLeftTopPoly(double x, double y) {
+
+        double[] leftTopEdge = {
+                x - 10, y,   //Starting point
+                x, y,
+
+                x, y,      //Ending point
+                x, y-10
+        };
+
+        Polyline leftTopPoly = new Polyline(leftTopEdge);
+        leftTopPoly.setStroke(Color.BLUE);
+
+        return leftTopPoly;
+    }
+
+    private Polyline getLeftMidPoly(double x, double y, double h) {
+        double[] leftMidEdge = {
+
+                x - 10, y+(h/2),
+                x, y + (h/2),
+
+                x, y + (h/2) - 5,
+                x, y + (h/2) + 5,
+
+        };
+
+        Polyline leftMidPoly = new Polyline(leftMidEdge);
+        leftMidPoly.setStroke(Color.BLUE);
+
+        return leftMidPoly;
+    }
+
+    private Polyline getLeftBottomPoly(double x, double y, double h) {
+
+
+        double[] leftBottomEdge = {
+
+                x - 10, y+h,
+                x, y + h,
+
+                x, y + h + 10,
+                x, y + h
+        };
+
+
+        Polyline leftBottomPoly = new Polyline(leftBottomEdge);
+        leftBottomPoly.setStroke(Color.BLUE);
+
+        return leftBottomPoly;
+    }
+
+    private Polyline getRightTopPoly(double x, double y, double w) {
+
+        double[] rightTopEdge = {
+                x + w + 10, y,
+                x + w, y,
+
+                x + w, y,
+                x + w, y - 10
+        };
+
+        Polyline rightTopPoly = new Polyline(rightTopEdge);
+        rightTopPoly.setStroke(Color.BLUE);
+
+        return rightTopPoly;
+    }
+
+    private Polyline getRightBottomPoly(double x, double y, double w, double h) {
+
+        double[] rightBottomEdge = {
+                x + w + 10, y + h,
+                x + w, y + h,
+
+                x + w, y + h + 10,
+                x + w, y + h
+        };
+
+
+        Polyline rightBottomPoly = new Polyline(rightBottomEdge);
+        rightBottomPoly.setStroke(Color.BLUE);
+
+        return rightBottomPoly;
+    }
+
+    private Polyline getRightMidPoly(double x, double y, double w,  double h) {
+
+        double[] rightMidEdge = {
+
+                x + w, y + (h/2) - 5,
+                x + w, y + (h/2) + 5,
+
+                x+w, y + (h/2),
+                x + w + 10,  y + (h/2),
+        };
+
+        Polyline rightMidPoly = new Polyline(rightMidEdge);
+        rightMidPoly.setStroke(Color.BLUE);
+
+        return rightMidPoly;
+
+    }
+
+
+    private Polyline getMidBottomPoly(double x, double y, double w, double h) {
+
+        double[] midBottomEdge = {
+                (x + (w/2)), y + h + 10,
+                (x + (w/2)), y + h,
+
+                (x + (w/2)) -5, y + h,
+                (x + (w/2)) +5, y + h
+        };
+
+        Polyline midBottomPoly = new Polyline(midBottomEdge);
+        midBottomPoly.setStroke(Color.BLUE);
+
+        return midBottomPoly;
+    }
+
+    private Polyline getMidTopPoly(double x, double y, double w) {
+
+        double[] midTopEdge = {
+
+                (x + (w/2)) - 5, y,
+                (x + (w/2)) + 5, y,
+
+                (x + (w/2)), y,
+                (x + (w/2)), y-10
+        };
+
+
+        Polyline midTopPoly = new Polyline(midTopEdge);
+        midTopPoly.setStroke(Color.BLUE);
+
+        return midTopPoly;
+    }
+
+
+
+
 
     private GridPane getNewMap(){
         GridPane newGridPane = new GridPane();
