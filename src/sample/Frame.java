@@ -55,7 +55,7 @@ public class Frame extends ImageView {
 
         circles = new ArrayList<>();
         createAndAddCircles(imgX,imgY,imgW,imgH);
-      //  hideCircles();
+        hideCircles();
 
         setOnMousePressed(EventHandler-> {
             showPoly(true);
@@ -260,27 +260,48 @@ public class Frame extends ImageView {
             poly.setVisible(flag);
     }
 
+
+    //MARK: Poly Location
+    //-----------------------------------------------------------------------------------------------------------//
+
     private void createAndAddPoly(double x, double y, double w, double h) {
 
-        polylines.add(getLeftTopPoly(x,y));
-        polylines.add(getLeftMidPoly(x,y,h));
-        polylines.add(getLeftBottomPoly(x,y,h));
+        Polyline leftTopPoly = new Polyline();
+        setLeftTopPoly(leftTopPoly,x,y);
+        polylines.add(leftTopPoly);
 
-        polylines.add(getRightTopPoly(x,y,w));
-        polylines.add(getRightMidPoly(x,y,w,h));
-        polylines.add(getRightBottomPoly(x,y,w,h));
+        Polyline leftMidPoly = new Polyline();
+        setLeftMidPoly(leftMidPoly,x,y,h);
+        polylines.add(leftMidPoly);
 
-        polylines.add(getMidBottomPoly(x,y,w,h));
-        polylines.add(getMidTopPoly(x,y,w));
+        Polyline leftBottomPoly = new Polyline();
+        setLeftBottomPoly(leftBottomPoly,x,y,h);
+        polylines.add(leftBottomPoly);
+
+        Polyline rightTopPoly = new Polyline();
+        setRightTopPoly(rightTopPoly,x,y,w);
+        polylines.add(rightTopPoly);
+
+        Polyline rightMidPoly = new Polyline();
+        setRightMidPoly(rightMidPoly,x,y,w,h);
+        polylines.add(rightMidPoly);
+
+        Polyline rightBottomPoly = new Polyline();
+        setRightBottomPoly(rightBottomPoly,x,y,w,h);
+        polylines.add(rightBottomPoly);
+
+        Polyline midTopPoly = new Polyline();
+        setMidTopPoly(midTopPoly,x,y,w);
+        polylines.add(midTopPoly);
+
+        Polyline midBottomPoly = new Polyline();
+        setMidBottomPoly(midBottomPoly,x,y,w,h);
+        polylines.add(midBottomPoly);
     }
 
-    private void updatePoly(double x, double y, double w, double h) {
+    private static void setLeftTopPoly(Polyline polyline, double x, double y) {
 
-    }
-
-    private static Polyline getLeftTopPoly(double x, double y) {
-
-        double[] leftTopEdge = {
+        Double[] leftTopEdge = {
                 x - 10, y,   //Starting point
                 x, y,
 
@@ -288,14 +309,13 @@ public class Frame extends ImageView {
                 x, y-10
         };
 
-        Polyline leftTopPoly = new Polyline(leftTopEdge);
-        leftTopPoly.setStroke(Color.BLUE);
-
-        return leftTopPoly;
+        polyline.getPoints().clear();
+        polyline.getPoints().addAll(leftTopEdge);
+        polyline.setStroke(Color.BLUE);
     }
 
-    private static Polyline getLeftMidPoly(double x, double y, double h) {
-        double[] leftMidEdge = {
+    private static void setLeftMidPoly(Polyline polyline, double x, double y, double h) {
+        Double[] leftMidEdge = {
 
                 x - 10, y+(h/2),
                 x, y + (h/2),
@@ -305,16 +325,15 @@ public class Frame extends ImageView {
 
         };
 
-        Polyline leftMidPoly = new Polyline(leftMidEdge);
-        leftMidPoly.setStroke(Color.BLUE);
-
-        return leftMidPoly;
+        polyline.getPoints().clear();
+        polyline.getPoints().addAll(leftMidEdge);
+        polyline.setStroke(Color.BLUE);
     }
 
-    private static Polyline getLeftBottomPoly(double x, double y, double h) {
+    private static void setLeftBottomPoly(Polyline polyline, double x, double y, double h) {
 
 
-        double[] leftBottomEdge = {
+        Double[] leftBottomEdge = {
 
                 x - 10, y+h,
                 x, y + h,
@@ -324,15 +343,14 @@ public class Frame extends ImageView {
         };
 
 
-        Polyline leftBottomPoly = new Polyline(leftBottomEdge);
-        leftBottomPoly.setStroke(Color.BLUE);
-
-        return leftBottomPoly;
+        polyline.getPoints().clear();
+        polyline.getPoints().addAll(leftBottomEdge);
+        polyline.setStroke(Color.BLUE);
     }
 
-    private static Polyline getRightTopPoly(double x, double y, double w) {
+    private static void setRightTopPoly(Polyline polyline, double x, double y, double w) {
 
-        double[] rightTopEdge = {
+        Double[] rightTopEdge = {
                 x + w + 10, y,
                 x + w, y,
 
@@ -340,15 +358,14 @@ public class Frame extends ImageView {
                 x + w, y - 10
         };
 
-        Polyline rightTopPoly = new Polyline(rightTopEdge);
-        rightTopPoly.setStroke(Color.BLUE);
-
-        return rightTopPoly;
+        polyline.getPoints().clear();
+        polyline.getPoints().addAll(rightTopEdge);
+        polyline.setStroke(Color.BLUE);
     }
 
-    private static Polyline getRightBottomPoly(double x, double y, double w, double h) {
+    private static void setRightBottomPoly(Polyline polyline, double x, double y, double w, double h) {
 
-        double[] rightBottomEdge = {
+        Double[] rightBottomEdge = {
                 x + w + 10, y + h,
                 x + w, y + h,
 
@@ -357,15 +374,14 @@ public class Frame extends ImageView {
         };
 
 
-        Polyline rightBottomPoly = new Polyline(rightBottomEdge);
-        rightBottomPoly.setStroke(Color.BLUE);
-
-        return rightBottomPoly;
+        polyline.getPoints().clear();
+        polyline.getPoints().addAll(rightBottomEdge);
+        polyline.setStroke(Color.BLUE);
     }
 
-    private static Polyline getRightMidPoly(double x, double y, double w,  double h) {
+    private static void setRightMidPoly(Polyline polyline, double x, double y, double w,  double h) {
 
-        double[] rightMidEdge = {
+        Double[] rightMidEdge = {
 
                 x + w, y + (h/2) - 5,
                 x + w, y + (h/2) + 5,
@@ -374,16 +390,14 @@ public class Frame extends ImageView {
                 x + w + 10,  y + (h/2),
         };
 
-        Polyline rightMidPoly = new Polyline(rightMidEdge);
-        rightMidPoly.setStroke(Color.BLUE);
-
-        return rightMidPoly;
-
+        polyline.getPoints().clear();
+        polyline.getPoints().addAll(rightMidEdge);
+        polyline.setStroke(Color.BLUE);
     }
 
-    private static Polyline getMidBottomPoly(double x, double y, double w, double h) {
+    private static void setMidBottomPoly(Polyline polyline, double x, double y, double w, double h) {
 
-        double[] midBottomEdge = {
+        Double[] midBottomEdge = {
                 (x + (w/2)), y + h + 10,
                 (x + (w/2)), y + h,
 
@@ -391,15 +405,14 @@ public class Frame extends ImageView {
                 (x + (w/2)) +5, y + h
         };
 
-        Polyline midBottomPoly = new Polyline(midBottomEdge);
-        midBottomPoly.setStroke(Color.BLUE);
-
-        return midBottomPoly;
+        polyline.getPoints().clear();
+        polyline.getPoints().addAll(midBottomEdge);
+        polyline.setStroke(Color.BLUE);
     }
 
-    private static Polyline getMidTopPoly(double x, double y, double w) {
+    private static void setMidTopPoly(Polyline polyline, double x, double y, double w) {
 
-        double[] midTopEdge = {
+        Double[] midTopEdge = {
 
                 (x + (w/2)) - 5, y,
                 (x + (w/2)) + 5, y,
@@ -408,10 +421,8 @@ public class Frame extends ImageView {
                 (x + (w/2)), y-10
         };
 
-
-        Polyline midTopPoly = new Polyline(midTopEdge);
-        midTopPoly.setStroke(Color.BLUE);
-
-        return midTopPoly;
+        polyline.getPoints().clear();
+        polyline.getPoints().addAll(midTopEdge);
+        polyline.setStroke(Color.BLUE);
     }
 }
