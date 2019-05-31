@@ -288,6 +288,9 @@ public class Controller {
 
     private void handleDragStart(MouseEvent event) {
 
+        if(!(event.getSource() instanceof  Frame))
+            return;
+
         temp = (Frame) event.getSource();
 
         //Set the content to be transfer

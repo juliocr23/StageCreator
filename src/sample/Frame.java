@@ -14,6 +14,7 @@ import java.beans.EventHandler;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Frame extends ImageView {
 
@@ -23,7 +24,7 @@ public class Frame extends ImageView {
     public  final   ArrayList<Polyline> polylines;
     private final   int RADIUS = 15;
 
-    private Cursor cursor;
+    private double draggedOffset = 0;
 
     public Frame(File file, double x, double y){
         super();
@@ -34,6 +35,10 @@ public class Frame extends ImageView {
             setX(x-(image.getWidth()/2));
             setY(y-(image.getHeight()/2));
             setImage(image);
+
+            setFitWidth(image.getWidth());
+            setFitHeight(image.getHeight());
+            setPreserveRatio(false);
 
             this.file = file;
         }catch (Exception e) {
@@ -50,7 +55,7 @@ public class Frame extends ImageView {
 
         circles = new ArrayList<>();
         createAndAddCircles(imgX,imgY,imgW,imgH);
-        hideCircles();
+      //  hideCircles();
 
         setOnMousePressed(EventHandler-> {
             showPoly(true);
@@ -76,10 +81,53 @@ public class Frame extends ImageView {
 
     }
 
+    private void createAndAddCircles(double x, double y, double w, double h){
+
+        Circle leftTopcircle = new Circle();
+        setLeftTopCircle(leftTopcircle,x,y);
+        setLeftTopCircleListener(leftTopcircle);
+        circles.add(leftTopcircle);
+
+        Circle leftMidCircle = new Circle();
+        setLeftMidCircle(leftMidCircle,x,y,h);
+        setLeftMidCircleListener(leftMidCircle);
+        circles.add(leftMidCircle);
+
+        Circle leftBottomCircle = new Circle();
+        setLeftBottomCircle(leftBottomCircle,x,y,h);
+        setLeftBottomCircleListener(leftBottomCircle);
+        circles.add(leftBottomCircle);
+
+        Circle rightTopCircle = new Circle();
+        setRightTopCircle(rightTopCircle,x, y, w);
+        setRightTopCircleListener(rightTopCircle);
+        circles.add(rightTopCircle);
+
+        Circle rightMidCircle = new Circle();
+        setRightMidCircle(rightMidCircle, x, y, w, h);
+        setRightMidCircleListener(rightMidCircle);
+        circles.add(rightMidCircle);
+
+        Circle rightBottomCircle = new Circle();
+        setRightBottomCircle(rightBottomCircle,x,y,w,h);
+        setRightBottomCircleListener(rightBottomCircle);
+        circles.add(rightBottomCircle);
+
+        Circle midTopCircle = new Circle();
+        setMidTopCircle(midTopCircle,x,y,w);
+        setMidTopCircleListener(midTopCircle);
+        circles.add(midTopCircle);
+
+        Circle midBottomCircle = new Circle();
+        setMidBottomCircle(midBottomCircle,x,y,w,h);
+        setMidBottomCircleListener(midBottomCircle);
+        circles.add(midBottomCircle);
+    }
+
     //----------------------------------------------------------------------------------------------------------//
     //MARK: Resize
 
-    //MARK: Circles
+    //MARK: Circles Location
     //-----------------------------------------------------------------------------------------------------------//
     private void hideCircles(){
 
@@ -87,112 +135,121 @@ public class Frame extends ImageView {
             circle.setFill(Color.TRANSPARENT);
     }
 
-    private void createAndAddCircles(double x, double y, double w, double h){
-
-        circles.add(getLeftTopCircle(x,y));
-        circles.add(getLeftBottomCircle(x,y,h));
-        circles.add(getLeftMidCircle(x,y,h));
-
-        circles.add(getRightTopCircle(x,y,w));
-        circles.add(getRightMidCircle(x,y,w,h));
-        circles.add(getRightBottomCircle(x,y,w,h));
-
-        circles.add(getMidTopCircle(x,y,w));
-        circles.add(getMidBottomCircle(x,y,w,h));
+    private void setLeftTopCircle(Circle circle, double x, double y) {
+        circle.setCenterX(x);
+        circle.setCenterY(y);
+        circle.setRadius(RADIUS);
     }
 
-    private Circle getLeftTopCircle(double x, double y){
-       Circle circle = new Circle(x,y,RADIUS);
-
-       circle.setOnMouseMoved(event -> {
-           if(isFocused())
-            circle.setCursor(Cursor.NW_RESIZE);
-       });
-
-       return circle;
+    private void setLeftMidCircle(Circle circle, double x, double y, double h){
+        circle.setRadius(RADIUS);
+        circle.setCenterX(x);
+        circle.setCenterY(y + (h/2));
     }
 
-    private Circle getLeftMidCircle(double x, double y, double h) {
-       Circle circle = new Circle(x, y + (h/2),RADIUS);
+    private void setLeftBottomCircle(Circle circle, double x, double y, double h) {
+        circle.setRadius(RADIUS);
+        circle.setCenterX(x);
+        circle.setCenterY(y + h);
+    }
 
-       circle.setOnMouseMoved(event -> {
+    private void setRightTopCircle(Circle circle, double x, double y, double w) {
+        circle.setRadius(RADIUS);
+        circle.setCenterX(x+w);
+        circle.setCenterY(y);
+    }
+
+    private void setRightMidCircle(Circle circle, double x, double y, double w, double h) {
+        circle.setRadius(RADIUS);
+        circle.setCenterX(x+w);
+        circle.setCenterY(y + (h/2));
+    }
+
+    private void setRightBottomCircle(Circle circle, double x, double y, double w, double h) {
+        circle.setRadius(RADIUS);
+        circle.setCenterX(x + w);
+        circle.setCenterY(y + h);
+    }
+
+    private void setMidTopCircle(Circle circle, double x, double y, double w) {
+        circle.setRadius(RADIUS);
+        circle.setCenterX(x + (w/2));
+        circle.setCenterY(y);
+    }
+
+    private void setMidBottomCircle(Circle circle, double x, double y, double w, double h) {
+        circle.setRadius(RADIUS);
+        circle.setCenterX(x + (w/2));
+        circle.setCenterY(y + h);
+    }
+
+    //MARK: Circles Listener
+    //---------------------------------------------------------------------------------------------------------------//
+
+    private void setLeftTopCircleListener(Circle circle) {
+
+        circle.setOnMouseMoved(event -> {
             if(isFocused())
-                circle.setCursor(Cursor.W_RESIZE);
-       });
-
-       return circle;
-    }
-
-    private Circle getLeftBottomCircle(double x, double y, double h) {
-      Circle circle = new Circle(x, y + h, RADIUS);
-
-      circle.setOnMouseMoved(event -> {
-
-          if(isFocused())
-            circle.setCursor(Cursor.SW_RESIZE);
-      });
-
-      return circle;
-    }
-
-    private Circle getRightTopCircle(double x, double y, double w) {
-      Circle circle = new Circle(x+w, y,RADIUS);
-
-      circle.setOnMouseMoved(event ->  {
-            if(isFocused())
-                circle.setCursor(Cursor.NE_RESIZE);
-      });
-
-      return circle;
-    }
-
-    private Circle getRightMidCircle(double x, double y, double w, double h) {
-        Circle circle = new Circle(x+w, y + (h/2), RADIUS);
-
-        circle.setOnMouseMoved(event ->  {
-                if(isFocused())
-                    circle.setCursor(Cursor.E_RESIZE);
+                circle.setCursor(Cursor.NW_RESIZE);
         });
 
-        return circle;
+        //TODO: Resize
+        circle.setOnMouseDragged(event -> {
+            System.out.println("Resizing");
+        });
     }
 
-    private Circle getRightBottomCircle(double x, double y, double w, double h) {
-       Circle circle = new Circle(x + w, y+h, RADIUS);
+    private void setLeftMidCircleListener(Circle circle){
+        circle.setOnMouseMoved(event -> {
+            if(isFocused())
+                circle.setCursor(Cursor.W_RESIZE);
+        });
+    }
 
+    private void setLeftBottomCircleListener(Circle circle) {
+        circle.setOnMouseMoved(event -> {
+
+            if(isFocused())
+                circle.setCursor(Cursor.SW_RESIZE);
+        });
+    }
+
+    private void setRightTopCircleListener(Circle circle) {
+        circle.setOnMouseMoved(event ->  {
+            if(isFocused())
+                circle.setCursor(Cursor.NE_RESIZE);
+        });
+    }
+
+    private void setRightMidCircleListener(Circle circle) {
+
+        circle.setOnMouseMoved(event ->  {
+            if(isFocused())
+                circle.setCursor(Cursor.E_RESIZE);
+        });
+    }
+
+    private void setRightBottomCircleListener(Circle circle) {
         circle.setOnMouseMoved(event ->  {
             if(isFocused())
                 circle.setCursor(Cursor.SE_RESIZE);
         });
-
-        return circle;
     }
 
-    private Circle getMidTopCircle(double x, double y, double w) {
-
-        Circle circle = new Circle(x + (w/2), y, RADIUS);
-
+    private void setMidTopCircleListener(Circle circle) {
         circle.setOnMouseMoved(event ->  {
             if(isFocused())
                 circle.setCursor(Cursor.N_RESIZE);
         });
-
-        return circle;
     }
 
-    private Circle getMidBottomCircle(double x, double y, double w, double h) {
-
-        Circle circle = new Circle(x + (w/2), y + h, RADIUS);
+    private void setMidBottomCircleListener(Circle circle) {
 
         circle.setOnMouseMoved(event ->  {
             if(isFocused())
                 circle.setCursor(Cursor.S_RESIZE);
         });
-
-        return circle;
     }
-
-
 
     //MARK: Poly
     //----------------------------------------------------------------------------------------------------------------//
@@ -215,6 +272,10 @@ public class Frame extends ImageView {
 
         polylines.add(getMidBottomPoly(x,y,w,h));
         polylines.add(getMidTopPoly(x,y,w));
+    }
+
+    private void updatePoly(double x, double y, double w, double h) {
+
     }
 
     private static Polyline getLeftTopPoly(double x, double y) {
