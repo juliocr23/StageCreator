@@ -1,30 +1,20 @@
 package sample;
 
-import javafx.event.Event;
 import javafx.scene.Cursor;
-import javafx.scene.ImageCursor;
 import javafx.scene.image.Image;
-
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polyline;
-
-import java.beans.EventHandler;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.HashMap;
 
 public class Frame extends ImageView {
 
     File file;
-
-    public  final   ArrayList<Circle> circles;
-    public  final   ArrayList<Polyline> polylines;
+    public  final   HashMap<Circle,PolyCircle> polyCircles;
     private final   int RADIUS = 15;
-
-    private double draggedOffset = 0;
 
     public Frame(File file, double x, double y){
         super();
@@ -50,78 +40,98 @@ public class Frame extends ImageView {
         double  imgW = getImage().getWidth();
         double  imgH = getImage().getHeight();
 
-        polylines = new ArrayList<>();
-        createAndAddPoly(imgX,imgY,imgW,imgH);
-
-        circles = new ArrayList<>();
-        createAndAddCircles(imgX,imgY,imgW,imgH);
-        hideCircles();
+        polyCircles = new HashMap<>();
+        createPolyCircles(imgX,imgY,imgW,imgH);
 
         setOnMousePressed(EventHandler-> {
             showPoly(true);
             setFocused(true);
         });
-
-//
-//        leftTopPoly.setOnMouseMoved(event-> {
-////            //Will change the cursor and enable the resize
-//////
-//////            System.out.println(event.getX());
-//////            System.out.println(event.getY());
-////
-////           //if(leftTopPoly.contains(event.getX() + 5,event.getSceneY()))
-////                leftTopPoly.setCursor(Cursor.NW_RESIZE);
-//        });
-//
-//        leftTopPoly.setOnMouseDragged(EventHandler-> {
-//            //Will do the resize
-//        });
-
-
-
     }
 
-    private void createAndAddCircles(double x, double y, double w, double h){
+    private void createPolyCircles(double x, double y, double w, double h){
 
+        PolyCircle temp;
+
+        //Left Top Conner
         Circle leftTopcircle = new Circle();
         setLeftTopCircle(leftTopcircle,x,y);
-        setLeftTopCircleListener(leftTopcircle);
-        circles.add(leftTopcircle);
+        setCircleListener(leftTopcircle);
 
+        Polyline leftTopPoly = new Polyline();
+        setLeftTopPoly(leftTopPoly,x,y);
+        temp = new PolyCircle("NW",leftTopcircle,leftTopPoly);
+        polyCircles.put(leftTopcircle,temp);
+
+        //Left mid conner
         Circle leftMidCircle = new Circle();
         setLeftMidCircle(leftMidCircle,x,y,h);
-        setLeftMidCircleListener(leftMidCircle);
-        circles.add(leftMidCircle);
+        setCircleListener(leftMidCircle);
 
+        Polyline leftMidPoly = new Polyline();
+        setLeftMidPoly(leftMidPoly,x,y,h);
+        temp = new PolyCircle("W",leftMidCircle,leftMidPoly);
+        polyCircles.put(leftMidCircle,temp);
+
+        //Left bottom conner
         Circle leftBottomCircle = new Circle();
         setLeftBottomCircle(leftBottomCircle,x,y,h);
-        setLeftBottomCircleListener(leftBottomCircle);
-        circles.add(leftBottomCircle);
+        setCircleListener(leftBottomCircle);
 
+        Polyline leftBottomPoly = new Polyline();
+        setLeftBottomPoly(leftBottomPoly,x,y,h);
+        temp = new PolyCircle("SW",leftBottomCircle,leftBottomPoly);
+        polyCircles.put(leftBottomCircle,temp);
+
+        //Right top conner
         Circle rightTopCircle = new Circle();
         setRightTopCircle(rightTopCircle,x, y, w);
-        setRightTopCircleListener(rightTopCircle);
-        circles.add(rightTopCircle);
+        setCircleListener(rightTopCircle);
 
+        Polyline rightTopPoly = new Polyline();
+        setRightTopPoly(rightTopPoly,x,y,w);
+        temp = new PolyCircle("NE",rightTopCircle,rightTopPoly);
+        polyCircles.put(rightTopCircle,temp);
+
+        //Right mid conner
         Circle rightMidCircle = new Circle();
         setRightMidCircle(rightMidCircle, x, y, w, h);
-        setRightMidCircleListener(rightMidCircle);
-        circles.add(rightMidCircle);
+        setCircleListener(rightMidCircle);
 
+        Polyline rightMidPoly = new Polyline();
+        setRightMidPoly(rightMidPoly,x,y,w,h);
+        temp = new PolyCircle("E",rightMidCircle,rightMidPoly);
+        polyCircles.put(rightMidCircle,temp);
+
+        //Right bottom conner
         Circle rightBottomCircle = new Circle();
         setRightBottomCircle(rightBottomCircle,x,y,w,h);
-        setRightBottomCircleListener(rightBottomCircle);
-        circles.add(rightBottomCircle);
+        setCircleListener(rightBottomCircle);
 
+        Polyline rightBottomPoly = new Polyline();
+        setRightBottomPoly(rightBottomPoly,x,y,w,h);
+        temp = new PolyCircle("SE",rightBottomCircle,rightBottomPoly);
+        polyCircles.put(rightBottomCircle,temp);
+
+        //Mid top conner
         Circle midTopCircle = new Circle();
         setMidTopCircle(midTopCircle,x,y,w);
-        setMidTopCircleListener(midTopCircle);
-        circles.add(midTopCircle);
+        setCircleListener(midTopCircle);
 
+        Polyline midTopPoly = new Polyline();
+        setMidTopPoly(midTopPoly,x,y,w);
+        temp = new PolyCircle("N",midTopCircle,midTopPoly);
+        polyCircles.put(midTopCircle,temp);
+
+        //Mid bottom conner
         Circle midBottomCircle = new Circle();
         setMidBottomCircle(midBottomCircle,x,y,w,h);
-        setMidBottomCircleListener(midBottomCircle);
-        circles.add(midBottomCircle);
+        setCircleListener(midBottomCircle);
+
+        Polyline midBottomPoly = new Polyline();
+        setMidBottomPoly(midBottomPoly,x,y,w,h);
+        temp = new PolyCircle("S",midBottomCircle,midBottomPoly);
+        polyCircles.put(midBottomCircle,temp);
     }
 
     //----------------------------------------------------------------------------------------------------------//
@@ -131,8 +141,8 @@ public class Frame extends ImageView {
     //-----------------------------------------------------------------------------------------------------------//
     private void hideCircles(){
 
-        for(Circle circle: circles)
-            circle.setFill(Color.TRANSPARENT);
+        for(PolyCircle polyCircle: polyCircles.values())
+            polyCircle.circle.setFill(Color.TRANSPARENT);
     }
 
     private void setLeftTopCircle(Circle circle, double x, double y) {
@@ -186,119 +196,210 @@ public class Frame extends ImageView {
     //MARK: Circles Listener
     //---------------------------------------------------------------------------------------------------------------//
 
+    private void setCircleListener(Circle circle) {
+        circle.setOnMouseMoved(event -> {
+
+            Circle src = (Circle) event.getSource();
+            if(isFocused()) {
+
+              PolyCircle polyCircle = polyCircles.get(src);
+
+              if(polyCircle.id.equals("N")) {
+                    polyCircle.circle.setCursor(Cursor.N_RESIZE);
+              } else if(polyCircle.id.equals("S")) {
+                  polyCircle.circle.setCursor(Cursor.S_RESIZE);
+              } else if(polyCircle.id.equals("E")){
+                  polyCircle.circle.setCursor(Cursor.E_RESIZE);
+              } else if(polyCircle.id.equals("SE")) {
+                  polyCircle.circle.setCursor(Cursor.SE_RESIZE);
+              } else if(polyCircle.id.equals("NE")) {
+                  polyCircle.circle.setCursor(Cursor.NE_RESIZE);
+              } else if(polyCircle.id.equals("W")) {
+                  polyCircle.circle.setCursor(Cursor.W_RESIZE);
+              } else if(polyCircle.id.equals("SW")) {
+                  polyCircle.circle.setCursor(Cursor.SW_RESIZE);
+              } else if(polyCircle.id.equals("NW")) {
+                  polyCircle.circle.setCursor(Cursor.NW_RESIZE);
+              }
+            }
+        });
+
+        circle.setOnMouseDragged(event -> {
+
+            double newX = event.getX();
+            double newY = event.getY();
+
+
+            Circle src = (Circle) event.getSource();
+            PolyCircle polySrc = polyCircles.get(src);
+
+            //Resize
+            resizeImage(polySrc,newX,newY);
+
+            //Location
+           // updatePolyCircle(newX,newY,getFitWidth(),getFitHeight());
+
+          //  setX(newX);
+           // setY(newY);
+
+        });
+    }
+
+
+    private void updatePolyCircle(double x, double y, double w, double h) {
+
+        for(PolyCircle polyCircle: polyCircles.values()) {
+
+            if (polyCircle.id.equals("N")) {
+                setMidTopPoly(polyCircle.polyline,x,y,w);
+                setMidTopCircle(polyCircle.circle,x, y, w);
+            } else if (polyCircle.id.equals("S")) {
+                setMidBottomPoly(polyCircle.polyline, x, y, w,h);
+                setMidBottomCircle(polyCircle.circle,x, y, w,h);
+            } else if (polyCircle.id.equals("E")) {
+                setRightMidPoly(polyCircle.polyline,x, y, w, h);
+                setRightMidCircle(polyCircle.circle,x, y, w, h);
+            } else if (polyCircle.id.equals("SE")) {
+                setRightBottomPoly(polyCircle.polyline, x, y, w, h);
+                setRightBottomCircle(polyCircle.circle, x,y,w, h);
+            } else if (polyCircle.id.equals("NE")) {
+                setRightTopPoly(polyCircle.polyline, x, y, w);
+                setRightTopCircle(polyCircle.circle, x, y, w);
+            } else if (polyCircle.id.equals("W")) {
+                setLeftMidPoly(polyCircle.polyline, x, y, h);
+                setLeftMidCircle(polyCircle.circle, x, y, h);
+            } else if (polyCircle.id.equals("SW")) {
+                setLeftBottomPoly(polyCircle.polyline, x, y, h);
+                setLeftBottomCircle(polyCircle.circle, x, y, h);
+            } else if (polyCircle.id.equals("NW")) {
+                setLeftTopPoly(polyCircle.polyline,x, y);
+                setLeftTopCircle(polyCircle.circle,x , y);
+            }
+        }
+    }
+
+    private void resizeImage(PolyCircle polyCircle, double x, double y) {
+
+        double yOffset;
+        double xOffset;
+
+        if (polyCircle.id.equals("N")) {
+
+            yOffset = getY() - y;
+            setFitHeight(getFitHeight()+yOffset);
+
+            updatePolyCircle(getX(),y, getFitWidth(),getFitHeight() );
+            setY(y);
+        }
+        else if (polyCircle.id.equals("S")) {
+
+            yOffset = y - (getY() + getFitHeight());
+            setFitHeight(getFitHeight() + yOffset);
+
+            updatePolyCircle(getX(),getY(), getFitWidth(),getFitHeight());
+        }
+        else if (polyCircle.id.equals("E")) {
+
+            xOffset = x - (getX() + getFitWidth());
+            setFitWidth(getFitWidth() + xOffset);
+
+            updatePolyCircle(getX(),getY(),getFitWidth(),getFitHeight());
+        }
+        else if (polyCircle.id.equals("SE")) {
+
+            xOffset = x - (getX() + getFitWidth());
+            yOffset = y - (getY() + getFitHeight());
+
+            setFitWidth(getFitWidth() + xOffset);
+            setFitHeight(getFitHeight() + yOffset);
+
+            updatePolyCircle(getX(),getY(),getFitWidth(),getFitHeight());
+        }
+        else if (polyCircle.id.equals("NE")) {
+
+            xOffset = x -  (getX() + getFitWidth());
+            yOffset = getY() - y;
+
+            setFitHeight(getFitHeight() + yOffset);
+            setFitWidth(getFitWidth() + xOffset);
+
+            updatePolyCircle(getX(),y, getFitWidth(), getFitHeight());
+            setY(y);
+        }
+        else if (polyCircle.id.equals("W")) {
+            xOffset = getX()-x;
+
+            setFitWidth(getFitWidth() + xOffset);
+
+            updatePolyCircle(x, getY(),getFitWidth(),getFitHeight());
+            setX(x);
+        }
+        else if (polyCircle.id.equals("SW")) {
+
+            xOffset = getX() - x;
+            yOffset = y - (getY() + getFitHeight());
+
+            setFitWidth(getFitWidth() + xOffset);
+            setFitHeight(getFitHeight() + yOffset);
+
+            updatePolyCircle(x, getY(),getFitWidth(),getFitHeight());
+
+            setX(x);
+        }
+        else if (polyCircle.id.equals("NW")) {
+
+            yOffset = getY() - y;
+            xOffset = getX() - x;
+
+            setFitWidth(getFitWidth()+xOffset);
+            setFitHeight(getFitHeight()+yOffset);
+
+            updatePolyCircle(x,y, getFitWidth(),getFitHeight());
+            setY(y);
+            setX(x);
+        }
+    }
+
+
+
     private void setLeftTopCircleListener(Circle circle) {
 
         circle.setOnMouseMoved(event -> {
+            Circle evntCircle = (Circle) event.getSource();
             if(isFocused())
-                circle.setCursor(Cursor.NW_RESIZE);
+              evntCircle.setCursor(Cursor.NW_RESIZE);
         });
 
         //TODO: Resize
         circle.setOnMouseDragged(event -> {
-            System.out.println("Resizing");
+
+
+           Circle evntCircle = (Circle) event.getSource();
+
+           double x =  event.getX();
+           double y =  event.getY();
+
+           double newX = evntCircle.getCenterX()-x;
+           double newY = evntCircle.getCenterY()-y;
+
+
+           System.out.println("x: " + x + "\ty: " + y);
         });
     }
 
-    private void setLeftMidCircleListener(Circle circle){
-        circle.setOnMouseMoved(event -> {
-            if(isFocused())
-                circle.setCursor(Cursor.W_RESIZE);
-        });
-    }
-
-    private void setLeftBottomCircleListener(Circle circle) {
-        circle.setOnMouseMoved(event -> {
-
-            if(isFocused())
-                circle.setCursor(Cursor.SW_RESIZE);
-        });
-    }
-
-    private void setRightTopCircleListener(Circle circle) {
-        circle.setOnMouseMoved(event ->  {
-            if(isFocused())
-                circle.setCursor(Cursor.NE_RESIZE);
-        });
-    }
-
-    private void setRightMidCircleListener(Circle circle) {
-
-        circle.setOnMouseMoved(event ->  {
-            if(isFocused())
-                circle.setCursor(Cursor.E_RESIZE);
-        });
-    }
-
-    private void setRightBottomCircleListener(Circle circle) {
-        circle.setOnMouseMoved(event ->  {
-            if(isFocused())
-                circle.setCursor(Cursor.SE_RESIZE);
-        });
-    }
-
-    private void setMidTopCircleListener(Circle circle) {
-        circle.setOnMouseMoved(event ->  {
-            if(isFocused())
-                circle.setCursor(Cursor.N_RESIZE);
-        });
-    }
-
-    private void setMidBottomCircleListener(Circle circle) {
-
-        circle.setOnMouseMoved(event ->  {
-            if(isFocused())
-                circle.setCursor(Cursor.S_RESIZE);
-        });
-    }
 
     //MARK: Poly
     //----------------------------------------------------------------------------------------------------------------//
 
     public void showPoly(boolean flag) {
 
-        for(Polyline poly: polylines)
-            poly.setVisible(flag);
+        for(PolyCircle polyCircle: polyCircles.values())
+           polyCircle.polyline.setVisible(flag);
     }
 
 
     //MARK: Poly Location
     //-----------------------------------------------------------------------------------------------------------//
-
-    private void createAndAddPoly(double x, double y, double w, double h) {
-
-        Polyline leftTopPoly = new Polyline();
-        setLeftTopPoly(leftTopPoly,x,y);
-        polylines.add(leftTopPoly);
-
-        Polyline leftMidPoly = new Polyline();
-        setLeftMidPoly(leftMidPoly,x,y,h);
-        polylines.add(leftMidPoly);
-
-        Polyline leftBottomPoly = new Polyline();
-        setLeftBottomPoly(leftBottomPoly,x,y,h);
-        polylines.add(leftBottomPoly);
-
-        Polyline rightTopPoly = new Polyline();
-        setRightTopPoly(rightTopPoly,x,y,w);
-        polylines.add(rightTopPoly);
-
-        Polyline rightMidPoly = new Polyline();
-        setRightMidPoly(rightMidPoly,x,y,w,h);
-        polylines.add(rightMidPoly);
-
-        Polyline rightBottomPoly = new Polyline();
-        setRightBottomPoly(rightBottomPoly,x,y,w,h);
-        polylines.add(rightBottomPoly);
-
-        Polyline midTopPoly = new Polyline();
-        setMidTopPoly(midTopPoly,x,y,w);
-        polylines.add(midTopPoly);
-
-        Polyline midBottomPoly = new Polyline();
-        setMidBottomPoly(midBottomPoly,x,y,w,h);
-        polylines.add(midBottomPoly);
-    }
-
     private static void setLeftTopPoly(Polyline polyline, double x, double y) {
 
         Double[] leftTopEdge = {
@@ -426,3 +527,23 @@ public class Frame extends ImageView {
         polyline.setStroke(Color.BLUE);
     }
 }
+
+class PolyCircle {
+
+    Circle circle;
+    Polyline polyline;
+    String id;
+
+    PolyCircle(String id, Circle circle, Polyline polyline) {
+        this.id = id;
+        this.circle = circle;
+        this.polyline = polyline;
+    }
+
+    PolyCircle(){
+        circle = new Circle();
+        polyline = new Polyline();
+        id = "";
+    }
+}
+
