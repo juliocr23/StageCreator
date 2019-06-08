@@ -1,4 +1,4 @@
-package sample;
+package app;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.canvas.Canvas;

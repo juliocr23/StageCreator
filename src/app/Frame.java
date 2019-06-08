@@ -1,4 +1,4 @@
-package sample;
+package app;
 
 import javafx.scene.Cursor;
 import javafx.scene.image.Image;
@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
 
-public class Frame extends ImageView {
+public class Frame extends ImageView  {
 
     File file;
     public  final   HashMap<Circle,PolyCircle> polyCircles;
@@ -47,6 +47,12 @@ public class Frame extends ImageView {
             showPoly(true);
             setFocused(true);
         });
+    }
+
+    public void updateLocation(double x, double y) {
+        setX(x);
+        setY(y);
+        updatePolyCircle(getX(), getY(),getFitWidth(),getFitHeight());
     }
 
     private void createPolyCircles(double x, double y, double w, double h){
@@ -235,18 +241,11 @@ public class Frame extends ImageView {
 
             //Resize
             resizeImage(polySrc,newX,newY);
-
-            //Location
-           // updatePolyCircle(newX,newY,getFitWidth(),getFitHeight());
-
-          //  setX(newX);
-           // setY(newY);
-
         });
     }
 
 
-    private void updatePolyCircle(double x, double y, double w, double h) {
+   public void updatePolyCircle(double x, double y, double w, double h) {
 
         for(PolyCircle polyCircle: polyCircles.values()) {
 

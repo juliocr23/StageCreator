@@ -1,10 +1,10 @@
-package sample;
+package app;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -12,19 +12,21 @@ import javafx.scene.control.*;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import java.io.*;
-import java.util.Arrays;
 import java.util.List;
 
 //TODO: Add a slider for zooming in and out.
+//TODO: Fix: When moving an image the resize goes to original, it should stay the same size.
+//TODO: Clean up the add/set row/col
+//TODO: Generate map file.
 
 public class Controller {
 
@@ -53,9 +55,10 @@ public class Controller {
 
     private Frame temp;  //Use for drag and drop temporary.
 
-    Canvas canvas;
-
     Pane pane;
+    Point2D lastXY = null;
+
+
 
     public void createComponents(){
 
@@ -115,34 +118,6 @@ public class Controller {
     }
 
 
-
-//    private void createCanvas(int width, int height) {
-//
-//        canvas = new Canvas(width,height);
-//        canvas.getGraphicsContext2D().setFill(Color.BLACK);
-//        canvas.getGraphicsContext2D().fillRect(0,0,width,height);
-//        canvas.getGraphicsContext2D().setStroke(Color.WHITE);
-//
-//        int w = 64;
-//        int h = 64;
-//
-//        int rowOffset = 0;
-//        int colOffset = 0;
-//
-//        for(int i = 0; i<height/64; i++) {
-//
-//            for (int j = 0; j <width/64; j++) {
-//               canvas.getGraphicsContext2D().strokeRect(10 + colOffset,10 + rowOffset,w,h);
-//               colOffset += w;
-//            }
-//            rowOffset += h;
-//            colOffset = 0;
-//        }
-//
-//        setDragAndDrop(canvas);
-//    }
-
-
     //MARK: Injected methods
     //--------------------------------------------------------------------------------------------------------------//
     @FXML
@@ -154,21 +129,21 @@ public class Controller {
 
     @FXML
     private void setRows(ActionEvent event){
-//
-//       TextField field =  (TextField) event.getSource();
-//
-//        if(!isNumber(field.getText())){
-//            field.setText("");
-//            return;
-//        }
-//
-//        //Get row input
-//        int rows = Integer.valueOf(field.getText());
-//
-//        //Get current cols
-//        int cols =  map.getColumnCount();
-//
-//        createRows(rows,cols);
+
+       TextField field =  (TextField) event.getSource();
+
+        if(!isNumber(field.getText())){
+            field.setText("");
+            return;
+        }
+
+        //Get row input
+        int rows = Integer.valueOf(field.getText());
+
+        //Get current cols
+        int cols =  map.getColumnCount();
+
+        createRows(rows,cols);
     }
 
     @FXML
@@ -237,16 +212,12 @@ public class Controller {
         newCanvas.getGraphicsContext2D().setFill(Color.WHITE);
         newCanvas.getGraphicsContext2D().fillText("(" + i + "," + j + ")",0,32);
         GridPane.setConstraints(newCanvas,j,i,1,1);
-
-
         map.getChildren().add(newCanvas);
-
     }
 
     private Canvas getNewCanvas(Color color){
 
         Canvas canvas = new Cell(64,64, color);
-      //  setDragAndDrop(canvas);
 
         return canvas;
     }
@@ -254,19 +225,41 @@ public class Controller {
     //MARK: Drag and Drop
     //--------------------------------------------------------------------------------------------------------------//
 
-
-
     private void setDragAndDrop(Node node) {
 
         //When moving sprites inside the GUI
-        node.setOnDragDetected(event -> handleDragStart(event));
+        node.setOnDragDetected(event -> {
+
+            if(!(event.getTarget() instanceof  Frame))
+                return;
+
+//            Frame on = (Frame)event.getTarget();
+//            Dragboard db = on.startDragAndDrop(TransferMode.MOVE);
+//
+//            Image imgView = null;
+//            try {
+//                FileInputStream inputStream = new FileInputStream(on.file);
+//                imgView = new Image(inputStream, on.getFitWidth(), on.getFitHeight(), false, true);
+//                inputStream.close();
+//
+//                System.out.println("w: " + on.getFitWidth() + "h: " + on.getFitHeight());
+//            }catch (Exception e) {
+//                System.out.println(e.getMessage());
+//            }
+//
+//            ClipboardContent cb = new ClipboardContent();
+//            cb.putImage(imgView);
+//            db.setContent(cb);
+
+            event.consume();
+        });
 
         node.setOnDragDropped(event -> {
             handleDrop(event);
         });
 
         node.setOnDragOver(event -> {
-            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            event.acceptTransferModes(TransferMode.MOVE);
             event.consume();
         });
 
@@ -283,37 +276,96 @@ public class Controller {
 
             dragEvent.consume();
         });
-    }
 
+        node.setOnMouseDragged(event -> {
+
+            if(!(event.getSource() instanceof  Frame))
+                return;
+
+            event.setDragDetect(false);
+
+            Frame source = (Frame) event.getSource();
+
+            //Get initial last  location of mouse
+            if (lastXY == null)
+                lastXY = new Point2D(event.getSceneX(), event.getSceneY());
+
+            //Get the deltaX and deltaY of the mouse
+            double dx = event.getSceneX() - lastXY.getX();
+            double dy = event.getSceneY() - lastXY.getY();
+
+            //Update location of current Frame
+            source.updateLocation(source.getX() + dx, source.getY() + dy);
+
+            //Record last Location of mouse
+            lastXY = new Point2D(event.getSceneX(), event.getSceneY());
+
+            //If there's been a change drag image
+            if (!source.intersects(event.getSceneX(), event.getSceneY(), 1, 1))
+                    event.setDragDetect(true);
+
+              event.consume();
+        });
+
+        node.setOnMouseReleased(event -> {
+            lastXY = null;
+        });
+    }
 
     private void handleDragStart(MouseEvent event) {
 
         if(!(event.getSource() instanceof  Frame))
             return;
 
-        temp = (Frame) event.getSource();
+         temp = (Frame) event.getSource();
+         ClipboardContent content = new ClipboardContent();
 
-        //Set the content to be transfer
-        ClipboardContent content = new ClipboardContent();
-        content.putFiles(Arrays.asList(temp.file));
+        Image imgView = null;
+        try {
+            FileInputStream inputStream = new FileInputStream(temp.file);
+            imgView = new Image(inputStream, temp.getFitWidth(), temp.getFitHeight(), false, true);
+            content.putImage(imgView);
+            inputStream.close();
 
-        Dragboard db = temp.startDragAndDrop(TransferMode.COPY_OR_MOVE);
+            System.out.println("w: " + temp.getFitWidth() + "h: " + temp.getFitHeight());
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        Dragboard db = temp.startDragAndDrop(TransferMode.MOVE);
         db.setContent(content);
-        db.setDragView(temp.getImage());
+        db.setDragView(imgView);
+        System.out.println(db.getDragView().getWidth() + " " + db.getDragView().getHeight());
 
         temp.showPoly(false);
         temp.setVisible(false);
-
         event.consume();
     }
 
     private void handleDrop(DragEvent event) {
 
-        System.out.println(event.getPickResult().getIntersectedNode());
         List<File> files = event.getDragboard().getFiles();
 
         if(files.size() > 0) {
-            addImage(files.get(0),event.getX(),event.getY());
+
+            Frame newView = new Frame(files.get(0),event.getX(),event.getY());
+            newView.showPoly(false);
+
+            //Add new image and poly
+            setDragAndDrop(newView);
+            pane.getChildren().add(newView);
+            for (PolyCircle polyCircle : newView.polyCircles.values()) {
+                pane.getChildren().add(polyCircle.circle);
+                pane.getChildren().add(polyCircle.polyline);
+            }
+        }
+        else if(temp != null) {
+
+                temp.updateLocation(event.getX(), event.getY());
+                temp.setVisible(true);
+                temp.showPoly(true);
+
+                temp = null;
         }
 
         event.setDropCompleted(true);
@@ -322,26 +374,25 @@ public class Controller {
 
     private void addImage(File file, double x, double y) {
 
-            Frame newView = new Frame(file,x,y);
-            newView.showPoly(false);
-
             if(temp != null) {
 
-                for(PolyCircle polyCircle: temp.polyCircles.values()) {
-                    pane.getChildren().remove(polyCircle.circle);
-                    pane.getChildren().remove(polyCircle.polyline);
-                }
+                temp.updateLocation(x, y);
+                temp.setVisible(true);
+                temp.showPoly(true);
 
-                pane.getChildren().remove(temp);
                 temp = null;
-            }
+            } else  {
 
-            //Add new image and poly
-            setDragAndDrop(newView);
-            pane.getChildren().add(newView);
-            for(PolyCircle polyCircle: newView.polyCircles.values()) {
-                pane.getChildren().add(polyCircle.circle);
-                pane.getChildren().add(polyCircle.polyline);
+                Frame newView = new Frame(file,x,y);
+                newView.showPoly(false);
+
+                //Add new image and poly
+                setDragAndDrop(newView);
+                pane.getChildren().add(newView);
+                for (PolyCircle polyCircle : newView.polyCircles.values()) {
+                    pane.getChildren().add(polyCircle.circle);
+                    pane.getChildren().add(polyCircle.polyline);
+                }
             }
     }
 

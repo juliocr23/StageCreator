@@ -3,5 +3,5 @@ module StageCreator {
     requires javafx.controls;
     requires javafx.swing;
 
-    opens sample;
+    opens app;
 }
