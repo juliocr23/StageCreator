@@ -136,16 +136,6 @@
                                           <Insets />
                                        </VBox.margin>
                                     </HBox>
-                                    <HBox prefHeight="28.0" prefWidth="157.0">
-                                       <children>
-                                          <Label prefHeight="28.0" prefWidth="99.0" text="Cell size:" textAlignment="CENTER" wrapText="true">
-                                             <font>
-                                                <Font size="10.0" />
-                                             </font>
-                                          </Label>
-                                          <TextField promptText="Cells size" text="64" />
-                                       </children>
-                                    </HBox>
                                     <MenuButton fx:id="addRowCol" mnemonicParsing="false" prefHeight="27.0" prefWidth="166.0" text="Add Row\Column">
                                       <items>
                                         <MenuItem mnemonicParsing="false" onAction="#selectedRowColOperation" text="Add Row Above" />

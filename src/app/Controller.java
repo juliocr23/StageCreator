@@ -1,4 +1,7 @@
 package app;
+import app.*;
+import app.Cell;
+import app.Frame;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,6 +22,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
+
+import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.List;
 
@@ -81,8 +88,8 @@ public class Controller {
 
         Insets value = new Insets(10,10,10,10);
         scroll.paddingProperty().setValue(value);
-    }
 
+    }
 
     private void createPane(int width, int height){
         pane = new Pane();
@@ -296,8 +303,6 @@ public class Controller {
             //Make moving image transparent
             source.setOpacity(0.9);
             source.showPoly(false);
-            source.showCircles(false);
-
 
             event.consume();
         });
@@ -311,9 +316,7 @@ public class Controller {
             Frame source = (Frame) event.getSource();
 
             source.setOpacity(1.0);
-            source.showPoly(true);
-            source.showCircles(true);
-
+            source.requestFocus();
         });
     }
 

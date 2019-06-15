@@ -1,5 +1,7 @@
 package app;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Cursor;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -42,11 +44,18 @@ public class Frame extends ImageView  {
 
         polyCircles = new HashMap<>();
         createPolyCircles(imgX,imgY,imgW,imgH);
+        showCircles(false);
 
-        setOnMousePressed(EventHandler-> {
-            showPoly(true);
-            setFocused(true);
+        setFocusTraversable(true);
+
+        focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue) {
+               showPoly(true);
+            } else {
+               showPoly(false);
+            }
         });
+
     }
 
     public void updateLocation(double x, double y) {
@@ -447,7 +456,6 @@ public class Frame extends ImageView  {
                 x, y + h
         };
 
-
         polyline.getPoints().clear();
         polyline.getPoints().addAll(leftBottomEdge);
         polyline.setStroke(Color.BLUE);
@@ -532,7 +540,7 @@ public class Frame extends ImageView  {
     }
 }
 
-class PolyCircle {
+ class PolyCircle {
 
     Circle circle;
     Polyline polyline;
