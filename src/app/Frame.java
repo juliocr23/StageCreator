@@ -145,10 +145,15 @@ public class Frame extends ImageView  {
 
     //MARK: Circles Location
     //-----------------------------------------------------------------------------------------------------------//
-    private void hideCircles(){
+    public void showCircles(boolean flag){
 
-        for(PolyCircle polyCircle: polyCircles.values())
-            polyCircle.circle.setFill(Color.TRANSPARENT);
+        for(PolyCircle polyCircle: polyCircles.values()) {
+
+            if(flag)
+                polyCircle.circle.setFill(Color.BLACK);
+            else
+                polyCircle.circle.setFill(Color.TRANSPARENT);
+        }
     }
 
     private void setLeftTopCircle(Circle circle, double x, double y) {

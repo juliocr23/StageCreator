@@ -12,7 +12,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -24,9 +23,10 @@ import java.io.*;
 import java.util.List;
 
 //TODO: Add a slider for zooming in and out.
-//TODO: Fix: When moving an image the resize goes to original, it should stay the same size.
 //TODO: Clean up the add/set row/col
 //TODO: Generate map file.
+//TODO: Use getSceneX and getSceneY instead of calculating the location.
+
 
 public class Controller {
 
@@ -53,12 +53,8 @@ public class Controller {
     @FXML
     private ScrollPane scroll;
 
-    private Frame temp;  //Use for drag and drop temporary.
-
-    Pane pane;
-    Point2D lastXY = null;
-
-
+    private Pane pane;
+    private Point2D lastXY = null; //Delta use for image drag
 
     public void createComponents(){
 
@@ -226,56 +222,52 @@ public class Controller {
     //--------------------------------------------------------------------------------------------------------------//
 
     private void setDragAndDrop(Node node) {
+       setOutsideDragAndDrop(node);
+       setInsideDragAndDrop(node);
+    }
 
-        //When moving sprites inside the GUI
-        node.setOnDragDetected(event -> {
+    private void setOutsideDragAndDrop(Node node) {
 
-            if(!(event.getTarget() instanceof  Frame))
-                return;
-
-//            Frame on = (Frame)event.getTarget();
-//            Dragboard db = on.startDragAndDrop(TransferMode.MOVE);
-//
-//            Image imgView = null;
-//            try {
-//                FileInputStream inputStream = new FileInputStream(on.file);
-//                imgView = new Image(inputStream, on.getFitWidth(), on.getFitHeight(), false, true);
-//                inputStream.close();
-//
-//                System.out.println("w: " + on.getFitWidth() + "h: " + on.getFitHeight());
-//            }catch (Exception e) {
-//                System.out.println(e.getMessage());
-//            }
-//
-//            ClipboardContent cb = new ClipboardContent();
-//            cb.putImage(imgView);
-//            db.setContent(cb);
-
-            event.consume();
-        });
-
+        //Handle the object being drop
         node.setOnDragDropped(event -> {
-            handleDrop(event);
+            handleOutsideDrop(event);
         });
 
+        //Accept object being drop
         node.setOnDragOver(event -> {
             event.acceptTransferModes(TransferMode.MOVE);
             event.consume();
         });
 
-
-        node.setOnDragExited(event ->  {
-            event.consume();
-        });
-
+        //What happens when drag is done from outside
         node.setOnDragDone(dragEvent -> {
-
-        if(!dragEvent.isDropCompleted())
-            if(temp != null)
-                temp.setVisible(true);
-
             dragEvent.consume();
         });
+    }
+
+    private void handleOutsideDrop(DragEvent event) {
+
+        List<File> files = event.getDragboard().getFiles();
+
+        if(files.size() > 0) {
+
+            Frame newView = new Frame(files.get(0),event.getX(),event.getY());
+            newView.showPoly(false);
+
+            //Add new image and poly
+            setDragAndDrop(newView);
+            pane.getChildren().add(newView);
+            for (PolyCircle polyCircle : newView.polyCircles.values()) {
+                pane.getChildren().add(polyCircle.circle);
+                pane.getChildren().add(polyCircle.polyline);
+            }
+        }
+
+        event.setDropCompleted(true);
+        event.consume();
+    }
+
+    private void setInsideDragAndDrop(Node node) {
 
         node.setOnMouseDragged(event -> {
 
@@ -300,100 +292,29 @@ public class Controller {
             //Record last Location of mouse
             lastXY = new Point2D(event.getSceneX(), event.getSceneY());
 
-            //If there's been a change drag image
-            if (!source.intersects(event.getSceneX(), event.getSceneY(), 1, 1))
-                    event.setDragDetect(true);
 
-              event.consume();
+            //Make moving image transparent
+            source.setOpacity(0.9);
+            source.showPoly(false);
+            source.showCircles(false);
+
+
+            event.consume();
         });
 
         node.setOnMouseReleased(event -> {
             lastXY = null;
+
+            if(!(event.getSource() instanceof  Frame))
+                return;
+
+            Frame source = (Frame) event.getSource();
+
+            source.setOpacity(1.0);
+            source.showPoly(true);
+            source.showCircles(true);
+
         });
-    }
-
-    private void handleDragStart(MouseEvent event) {
-
-        if(!(event.getSource() instanceof  Frame))
-            return;
-
-         temp = (Frame) event.getSource();
-         ClipboardContent content = new ClipboardContent();
-
-        Image imgView = null;
-        try {
-            FileInputStream inputStream = new FileInputStream(temp.file);
-            imgView = new Image(inputStream, temp.getFitWidth(), temp.getFitHeight(), false, true);
-            content.putImage(imgView);
-            inputStream.close();
-
-            System.out.println("w: " + temp.getFitWidth() + "h: " + temp.getFitHeight());
-        }catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-
-        Dragboard db = temp.startDragAndDrop(TransferMode.MOVE);
-        db.setContent(content);
-        db.setDragView(imgView);
-        System.out.println(db.getDragView().getWidth() + " " + db.getDragView().getHeight());
-
-        temp.showPoly(false);
-        temp.setVisible(false);
-        event.consume();
-    }
-
-    private void handleDrop(DragEvent event) {
-
-        List<File> files = event.getDragboard().getFiles();
-
-        if(files.size() > 0) {
-
-            Frame newView = new Frame(files.get(0),event.getX(),event.getY());
-            newView.showPoly(false);
-
-            //Add new image and poly
-            setDragAndDrop(newView);
-            pane.getChildren().add(newView);
-            for (PolyCircle polyCircle : newView.polyCircles.values()) {
-                pane.getChildren().add(polyCircle.circle);
-                pane.getChildren().add(polyCircle.polyline);
-            }
-        }
-        else if(temp != null) {
-
-                temp.updateLocation(event.getX(), event.getY());
-                temp.setVisible(true);
-                temp.showPoly(true);
-
-                temp = null;
-        }
-
-        event.setDropCompleted(true);
-        event.consume();
-    }
-
-    private void addImage(File file, double x, double y) {
-
-            if(temp != null) {
-
-                temp.updateLocation(x, y);
-                temp.setVisible(true);
-                temp.showPoly(true);
-
-                temp = null;
-            } else  {
-
-                Frame newView = new Frame(file,x,y);
-                newView.showPoly(false);
-
-                //Add new image and poly
-                setDragAndDrop(newView);
-                pane.getChildren().add(newView);
-                for (PolyCircle polyCircle : newView.polyCircles.values()) {
-                    pane.getChildren().add(polyCircle.circle);
-                    pane.getChildren().add(polyCircle.polyline);
-                }
-            }
     }
 
     private GridPane getNewMap(){
