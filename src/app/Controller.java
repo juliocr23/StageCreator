@@ -1,7 +1,4 @@
 package app;
-import app.*;
-import app.Cell;
-import app.Frame;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -22,10 +19,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
-
-import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.List;
 
@@ -33,6 +26,7 @@ import java.util.List;
 //TODO: Clean up the add/set row/col
 //TODO: Generate map file.
 //TODO: Use getSceneX and getSceneY instead of calculating the location.
+//TODO: Add map size width and height in order of 64.
 
 
 public class Controller {
