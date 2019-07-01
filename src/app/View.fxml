@@ -33,7 +33,9 @@
               <menus>
                 <Menu mnemonicParsing="false" text="File">
                   <items>
+                        <MenuItem mnemonicParsing="false" text="open" />
                     <MenuItem mnemonicParsing="false" text="Close" />
+                        <MenuItem mnemonicParsing="false" onAction="#generateGame" text="export" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
@@ -138,10 +140,10 @@
                                     </HBox>
                                     <MenuButton fx:id="addRowCol" mnemonicParsing="false" prefHeight="27.0" prefWidth="166.0" text="Add Row\Column">
                                       <items>
-                                        <MenuItem mnemonicParsing="false" onAction="#selectedRowColOperation" text="Add Row Above" />
-                                        <MenuItem mnemonicParsing="false" onAction="#selectedRowColOperation" text="Add Row Below" />
-                                          <MenuItem mnemonicParsing="false" onAction="#selectedRowColOperation" text="Add Column Before" />
-                                          <MenuItem mnemonicParsing="false" onAction="#selectedRowColOperation" text="Add Column After" />
+                                        <MenuItem mnemonicParsing="false" onAction="#addRowAbove" text="Add Row Above" />
+                                        <MenuItem mnemonicParsing="false" onAction="#addRowBelow" text="Add Row Below" />
+                                          <MenuItem mnemonicParsing="false" onAction="#addColBefore" text="Add Column Before" />
+                                          <MenuItem mnemonicParsing="false" onAction="#addColAfter" text="Add Column After" />
                                       </items>
                                     </MenuButton>
                                  </children>

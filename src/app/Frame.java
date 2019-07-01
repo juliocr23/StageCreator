@@ -7,20 +7,28 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polyline;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Frame extends ImageView  {
 
-    File file;
+    private File file;
     public  final   HashMap<Circle,PolyCircle> polyCircles;
     private final   int RADIUS = 15;
 
+    private ArrayList<Image> images;
+
     public Frame(File file, double x, double y){
         super();
+
+        images = new ArrayList<>();
+
         try {
             FileInputStream inputStream = new FileInputStream(file);
 
             Image image = new Image(inputStream);
+            images.add(image);
+
             setX(x-(image.getWidth()/2));
             setY(y-(image.getHeight()/2));
             setImage(image);
@@ -245,7 +253,6 @@ public class Frame extends ImageView  {
 
             double newX = event.getX();
             double newY = event.getY();
-
 
             Circle src = (Circle) event.getSource();
             PolyCircle polySrc = polyCircles.get(src);
