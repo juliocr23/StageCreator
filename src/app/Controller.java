@@ -42,10 +42,10 @@ public class Controller {
     private MenuButton addRowCol;
 
     @FXML
-    private TextField rows;
+    private TextField colTextField;
 
     @FXML
-    private TextField cols;
+    private TextField rowTextField;
 
     @FXML
     private AnchorPane sceneBg;
@@ -55,6 +55,10 @@ public class Controller {
 
     private Pane map;
     private Point2D lastXY = null; //Delta use for image drag
+
+    private final int CELL_SIZE = 64;
+    private int rows = 0;
+    private int cols = 0;
 
     public void createComponents(){
 
@@ -70,18 +74,14 @@ public class Controller {
         int height = (int)sceneBg.getHeight();
         int width  = (int)sceneBg.getWidth();
 
-        int rows = height/64;
-        int cols = width/64;
+        rows = height/64;
+        cols = width/64;
 
-        this.rows.setText(rows + "");
-        this.cols.setText(cols + "");
+        this.rowTextField.setText(rows + "");
+        this.colTextField.setText(cols + "");
 
-        createPane(width,height);
-//        scroll.setContent(map);
-//
-//        Insets value = new Insets(10,10,10,10);
-//        scroll.paddingProperty().setValue(value);
-
+        map = new Pane();
+        createPane(rows,cols);
     }
 
     private Rectangle getCell(int c, int r, int w, int h) {
@@ -92,26 +92,20 @@ public class Controller {
         return rectangle;
     }
 
-
-    private void createPane(int width, int height){
-        map = new Pane();
-        map.setPrefSize(width,height);
-
-        int w = 64;
-        int h = 64;
+    private void createPane(int rows, int cols){
 
         int rowOffset = 0;
         int colOffset = 0;
 
-        for(int i = 0; i<height/64; i++) {
+        for(int i = 0; i<rows; i++) {
 
-            for (int j = 0; j <width/64; j++) {
+            for (int j = 0; j <cols; j++) {
 
-                map.getChildren().add(getCell(colOffset, rowOffset,w,h));
+                map.getChildren().add(getCell(colOffset, rowOffset,CELL_SIZE,CELL_SIZE));
 
-                colOffset += w;
+                colOffset += CELL_SIZE;
             }
-            rowOffset += h;
+            rowOffset += CELL_SIZE;
             colOffset = 0;
         }
 
@@ -120,6 +114,9 @@ public class Controller {
 
         Insets value = new Insets(10,10,10,10);
         scroll.paddingProperty().setValue(value);
+
+        this.rows = rows;
+        this.cols = cols;
     }
 
 
@@ -148,26 +145,80 @@ public class Controller {
     @FXML
     private void setRows(ActionEvent event){
 
-        var newRows = Integer.parseInt(rows.getText());
-        createPane((int)map.getWidth(),newRows*64);
+        var newRows = Integer.parseInt(rowTextField.getText());
+
+        map = new Pane();
+        createPane(newRows,cols);
     }
 
     @FXML
     private void setCols(ActionEvent event) {
 
-        var newCols = Integer.parseInt(cols.getText());
-        createPane(newCols*64,(int)map.getHeight());
+        var newCols = Integer.parseInt(colTextField.getText());
+
+        map = new Pane();
+        createPane(rows,newCols);
     }
 
     @FXML
     private void addRowAbove(ActionEvent event) {
 
-        System.out.print("Adding col");
+       ObservableList<Node> newList = FXCollections.observableArrayList();
+
+        int x = 0;
+        int y = 0;
+
+        rows++;
+        for(int i = 0; i<rows; i++) {
+
+           for(int j = 0; j<cols; j++) {
+
+               Rectangle rect;
+               if(i == 0) {   //The rows being add it above
+                   rect = getCell(x,y,CELL_SIZE,CELL_SIZE);
+                   rect.setFill(Color.BLUE);
+                   newList.add(rect);
+               }
+               else { //The rows that were already there.
+                   var index = (i-1)*cols + j;
+                   rect = (Rectangle) map.getChildren().get(index);
+                   rect.setX(x);
+                   rect.setY(y);
+
+                   newList.add(rect);
+               }
+
+               x += CELL_SIZE;
+           }
+           y += CELL_SIZE;
+           x = 0;
+       }
+
+        map.getChildren().setAll(newList);
     }
 
     @FXML
     private void addRowBelow(ActionEvent event) {
 
+        int x = 0;
+
+        var lastRect = (Rectangle) map.getChildren().get(map.getChildren().size()-1);
+        int y = (int)lastRect.getY() + CELL_SIZE;
+
+        rows++;
+        for(int i = 0; i<1; i++) {
+
+            for(int j = 0; j<cols; j++) {
+
+                 var rect = getCell(x,y,CELL_SIZE,CELL_SIZE);
+                 rect.setFill(Color.BLUE);
+                 map.getChildren().add(rect);
+
+                x += CELL_SIZE;
+            }
+            y += CELL_SIZE;
+            x = 0;
+        }
     }
 
     @FXML

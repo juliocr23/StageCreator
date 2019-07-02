@@ -112,7 +112,7 @@
                                                       <Font name="System Bold" size="10.0" />
                                                    </font>
                                                 </Label>
-                                                <TextField fx:id="rows" onAction="#setRows" prefHeight="27.0" prefWidth="47.0">
+                                                <TextField fx:id="rowTextField" onAction="#setRows" prefHeight="27.0" prefWidth="47.0">
                                                    <HBox.margin>
                                                       <Insets />
                                                    </HBox.margin>
@@ -126,7 +126,7 @@
                                                       <Font size="10.0" />
                                                    </font>
                                                 </Label>
-                                                <TextField fx:id="cols" onAction="#setCols" prefHeight="27.0" prefWidth="47.0" HBox.hgrow="ALWAYS">
+                                                <TextField fx:id="colTextField" onAction="#setCols" prefHeight="27.0" prefWidth="47.0" HBox.hgrow="ALWAYS">
                                                    <HBox.margin>
                                                       <Insets />
                                                    </HBox.margin>
