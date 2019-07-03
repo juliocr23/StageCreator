@@ -60,6 +60,7 @@ public class Controller {
     private int rows = 0;
     private int cols = 0;
 
+
     public void createComponents(){
 
         //Add types of sprites
@@ -224,6 +225,42 @@ public class Controller {
     @FXML
     private void addColBefore(ActionEvent event) {
 
+        ObservableList<Node> newList = FXCollections.observableArrayList();
+
+        int x = 0;
+        int y = 0;
+
+        cols++;
+        for(int i = 0; i<rows; i++) {
+
+            for(int j = 0; j<cols; j++) {
+
+                Rectangle rect;
+                if(j == 0) {
+                    var index = i*cols + (j);
+                    //System.out.println(index);
+                    rect = getCell(x, y, CELL_SIZE, CELL_SIZE);
+                    rect.setFill(Color.YELLOW);
+                    newList.add(rect);
+                } else {
+
+                    var index = i*(cols-1) + (j-1);
+                    System.out.println(index);
+                    rect = (Rectangle) map.getChildren().get(index);
+                    rect.setX(x);
+                    rect.setY(y);
+                    newList.add(rect);
+
+                }
+
+                x += CELL_SIZE;
+            }
+
+            y += CELL_SIZE;
+            x = 0;
+        }
+
+        map.getChildren().setAll(newList);
     }
 
     @FXML
